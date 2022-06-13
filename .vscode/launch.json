@@ -1,0 +1,16 @@
+{
+    "configurations": [
+    {
+        "name": "Django",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/manage.py",
+        "args": [
+            "runserver",
+            "--noreload",
+            "--nothreading"
+        ],
+        "django": true
+    }
+    ]
+}

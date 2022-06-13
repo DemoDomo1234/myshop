@@ -1,0 +1,13 @@
+img
+{
+    width: 300px;
+    height: 200px;
+}
+body {
+    text-align: center;
+}
+p{
+   font-family: 'Courier New', Courier, monospace; 
+   color: rgb(0, 0, 0);
+   text-align: center;
+}

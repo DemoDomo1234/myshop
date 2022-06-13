@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav class="navbar navbar-light bg-light">
+  <div class="container-fluid">
+    <form class="d-flex" method='get'>
+      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name='search'>
+      <button class="btn btn-outline-primary" type="submit">Search</button>
+    </form>
+  </div>
+</nav>
+    <form  enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        add
+        <br>
+        color
+        <br>
+        {% for post in colors %}
+        <label>{{post.color}}</label>
+        <input type="checkbox" name="color" value="{{post.color}}">
+        {% endfor %}
+        <br>
+        size
+        <br>
+        {% for post in sizes %}
+        <label>{{post.size}}</label>
+        <input type="checkbox" name="size" value="{{post.size}}">
+        {% endfor %}
+        <br>
+        category
+        <br>
+        {% for post in categorys %}
+        <label>{{post.titel}}</label>
+        <input type="checkbox" name="category" value="{{post.titel}}">
+        {% endfor %}
+        <br>
+
+        remove
+        <br>
+        color
+        <br>
+        {% for post in mycolors %}
+        <label>{{post.color}}</label>
+        <input type="checkbox" name="colors" value="{{post.color}}">
+        {% endfor %}
+        <br>
+        size
+        <br>
+        {% for post in mysizes %}
+        <label>{{post.size}}</label>
+        <input type="checkbox" name="sizes" value="{{post.size}}">
+        {% endfor %}
+        <br>
+        category
+        <br>
+        {% for post in mycategory %}
+        <label>{{post.titel}}</label>
+        <input type="checkbox" name="categorys" value="{{post.titel}}">
+        {% endfor %}
+        <br>
+          <input type="submit" value="update">
+    </form>
+
+    {% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load social_share %}
+{% block content %}
+    <h2>{{blog.titel}}</h2>
+    <img src="{{blog.image.url}}">
+    <p>{{blog.body}}</p>
+    <p>{{blog.price}}</p>
+    <p>{{blog.time}}</p>
+    {% post_to_facebook object_or_url "Post to Facebook!" %}
+    {% post_to_twitter "New Song: {{blog.titel}}. Check it out!" object_or_url "Post to Twitter" %}
+    {% post_to_telegram "New Song: {{blog.titel}}" %}
+    {% post_to_whatsapp object_or_url "Share via WhatsApp" %}
+    {% add_pinterest_script %}
+    {% if request.user in blog.likes.all %}
+    <a href="{% url 'appblog:unlike' blog.id %}"><button>👎</button></a>
+    {% else %}
+    <a href="{% url 'appblog:like' blog.id %}"><button>👍</button></a>
+    {% endif %}
+    {% if request.user in blog.saved.all %}
+    <a href="{% url 'appblog:unsaved' blog.id %}"><button>unsaved</button></a>
+    {% else %}
+    <a href="{% url 'appblog:saved' blog.id %}"><button>saved</button></a>
+    {% endif %}
+    {% if blog.author == request.user %}
+    <a href="{% url 'appblog:update' blog.id %}">update</a>
+    <a href="{% url 'appblog:delete' blog.id %}">delete</a>
+    {% endif %}
+    <p>create coments</p>
+    <form method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" value="create">
+    </form>
+    <p>coments</p>
+    {% for text in coments %}
+    <p>{{text.titel}}</p>
+    <p>{{text.body}}</p>
+    <p>{{text.user}}</p>
+    <p>{{text.date}}</p>
+    <a href="{% url 'coment:likes' text.id %}"><button>like</button></a>
+    <a href="{% url 'coment:unlikes' text.id %}"><button>unlike</button></a>
+    <br>
+    <a href="{% url 'coment:update' text.id %}">update</a>
+    <a href="{% url 'coment:delete' text.id %}">delete</a>
+
+    <p>__________________________________________________________________________________________________________________________________________________________________</p>
+    {% endfor %}
+    {% for post in appblogs %}
+    <div class="card" style="width: 18rem;">
+        <img src="{{post.image.url}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{post.titel}}</h5>
+          <p class="card-text">{{post.price}}</p>
+          <a href="{% url 'appblog:detail' post.id %}" class="btn btn-primary">detail</a>
+        </div>
+      </div>
+      {% endfor %}
+    {% endblock %}

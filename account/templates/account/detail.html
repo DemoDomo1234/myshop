@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+    <p>profile</p>
+    <labe>username</label>
+    <h2>{{user.username}}</h2>
+    <label>name</label>
+    <p>{{user.name}}</p>
+    <label>familie</label>
+    <p>{{user.familie}}</p>
+    <label>number</label>
+    <p>{{user.number}}</p>
+    <label>email</label>
+    <p>{{user.email}}</p>
+    <p>likes</p>
+    {% for post in likes %}
+    <div class="card" style="width: 18rem;">
+        <img src="{{post.image.url}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{post.titel}}</h5>
+          <p class="card-text">{{post.price}}</p>
+          <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
+        </div>
+      </div>
+      {% endfor %}
+      <p>notifications</p>
+      {% for post in notification %}
+      <div class="card" style="width: 18rem;">
+          <img src="{{post.image.url}}" class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title">{{post.titel}}</h5>
+            <p class="card-text">{{post.price}}</p>
+            <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
+          </div>
+        </div>
+        {% endfor %}
+        <p>address</p>
+        {% for post in address %}
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title">{{post.floor}}</h5>
+              <p class="card-text">{{post.plaque}}</p>
+            </div>
+          </div>
+          {% endfor %}
+          <p>lists</p>
+          {% for post in lists %}
+          <div class="card" style="width: 18rem;">
+              <div class="card-body">
+                <h5 class="card-title">{{post.titel}}</h5>
+                <p class="card-text">{{post.body}}</p>
+                <a href="{% url 'blog:detail_list' post.id %}">detail</a>
+              </div>
+            </div>
+            {% endfor %}
+
+            <p>noty</p>
+            {% for post in nont %}
+
+                  <p>{{post.titel}}</p>
+                  <p>{{post.body}}</p>
+              {% endfor %}
+    
+{% endblock %}

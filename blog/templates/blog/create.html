@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<nav class="navbar navbar-light bg-light">
+  <div class="container-fluid">
+    <form class="d-flex" method='get'>
+      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name='search'>
+      <button class="btn btn-outline-primary" type="submit">Search</button>
+    </form>
+  </div>
+</nav>
+
+
+        <form  enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        {{form|crispy}}
+          color
+          <br>
+          {% for posts in colors %}
+          <label>{{posts.color}}</label>
+          <input type="checkbox" name="color" value="{{posts.color}}">
+          {% endfor %}
+          <br>
+          size
+          <br>
+          {% for postes in sizes %}
+          <label>{{postes.size}}</label>
+          <input type="checkbox" name="size" value="{{postes.size}}">
+          {% endfor %}
+          {% for post in blog %}
+          <label>{{post.titel}}</label>
+          <input type="checkbox" name="category" value="{{post.titel}}">
+        {% endfor %}
+          <br>
+          category
+          <br>
+          {% for posts in category %}
+          <label>{{posts.titel}}</label>
+          <input type="checkbox" name="category" value="{{posts.titel}}">
+          {% endfor %}
+          <br>
+          <input type="submit" value="create">
+    </form>
+    <a href="{% url 'blog:create_category' %}">create category</a>
+    {% endblock %}

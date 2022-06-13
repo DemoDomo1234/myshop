@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+          <form class="d-flex" method='get'>
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name='search'>
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+          </form>
+        </div>
+      </nav>
+
+    {% for post in blog %}
+    <div class="card" style="width: 18rem;">
+        <img src="{{post.image.url}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{post.titel}}</h5>
+          <p class="card-text">{{post.price}}</p>
+          <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
+        </div>
+      </div>
+      {% endfor %}
+<p>-----------------------------------------------------------------------------------------</p>
+    <p>discounts</p>
+    {% for post in myblog %}
+    <div class="card" style="width: 18rem;">
+        <img src="{{post.image.url}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{post.titel}}</h5>
+          <p class="card-text">{{post.price}}</p>
+          <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
+        </div>
+      </div>
+      {% endfor %}
+
+<p>-----------------------------------------------------------------------------------------</p>
+    <p>max_sale</p>
+    {% for post in num_max %}
+    <div class="card" style="width: 18rem;">
+        <img src="{{post.image.url}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{post.titel}}</h5>
+          <p class="card-text">{{post.price}}</p>
+          <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
+        </div>
+      </div>
+      {% endfor %}
+
+    {% endblock %}
