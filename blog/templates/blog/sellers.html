@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+    <form  enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        address
+        {% for post in addresses %}
+        <label>{{post.name}}</label>
+        <input type="radio" name="address" value="{{post.name}}">
+        {% endfor %}
+        <br>
+          <input type="submit" value="create">
+    </form>
+    {% endblock %}

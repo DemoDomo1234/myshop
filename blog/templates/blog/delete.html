@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
+{% extends 'base.html' %}
+{% block content %}
     <form method="POST">
         {% csrf_token %}
-        <p>delete this post</p>
         <input type="submit" value="delete">
     </form>
+    {% endblock %}
     {% endblock %}

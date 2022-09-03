@@ -3,6 +3,6 @@
     <form  enctype="multipart/form-data" method="POST">
         {% csrf_token %}
         {{form.as_p}}
-          <input type="submit" value="update">
+          <input type="submit" value="update" class="btn btn-warning">
     </form>
     {% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Coments ,ComentsBlog
+from .models import Coments , ComentsBlog , Custion
 
 class ComentsAdmin(admin.ModelAdmin):
     list_display = ("titel", "user" , "body")
@@ -14,3 +14,10 @@ class ComentsBlogAdmin(admin.ModelAdmin):
     search_fields = ("titel" , "user" , "body")
 
 admin.site.register(ComentsBlog , ComentsBlogAdmin)
+
+# class CustionAdmin(admin.ModelAdmin):
+#     list_display = ("titel", "user" , "body")
+#     list_filter = ("date" , "titel" , "user" , "body" )
+#     search_fields = ("titel" , "user" , "body")
+
+admin.site.register(Custion)

@@ -13,30 +13,28 @@
 
         <form  enctype="multipart/form-data" method="POST">
         {% csrf_token %}
+        {{ form.media }}
         {{form|crispy}}
-          color
           <br>
-          {% for posts in colors %}
-          <label>{{posts.color}}</label>
-          <input type="checkbox" name="color" value="{{posts.color}}">
+          address
+          {% for post in addresses %}
+          <label>{{post.name}}</label>
+          <input type="radio" name="address" value="{{post.name}}">
           {% endfor %}
-          <br>
-          size
-          <br>
-          {% for postes in sizes %}
-          <label>{{postes.size}}</label>
-          <input type="checkbox" name="size" value="{{postes.size}}">
-          {% endfor %}
-          {% for post in blog %}
-          <label>{{post.titel}}</label>
-          <input type="checkbox" name="category" value="{{post.titel}}">
-        {% endfor %}
           <br>
           category
           <br>
           {% for posts in category %}
           <label>{{posts.titel}}</label>
           <input type="checkbox" name="category" value="{{posts.titel}}">
+          {% endfor %}
+          <br>
+          <br>
+          brand
+          <br>
+          {% for posts in brands %}
+          <label>{{posts.brand}}</label>
+          <input type="checkbox" name="brand" value="{{posts.brand}}">
           {% endfor %}
           <br>
           <input type="submit" value="create">

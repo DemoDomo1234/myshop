@@ -2,8 +2,9 @@
 {% load crispy_forms_tags %} 
 {% block content %}
     <form  enctype="multipart/form-data" method="POST">
-        {% csrf_token %}
-        {{form|crispy}}
-          <input type="submit" value="create">
+      {% csrf_token %}
+      {{ form.media }}
+      {{form|crispy}} 
+          <input type="submit" value="create" class="btn btn-success">
     </form>
     {% endblock %}

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import *
 
+
 class BlogAdmin(admin.ModelAdmin):
     list_display = ("titel", "seller")
     list_filter = ("time" , "seller" , "price" )
@@ -10,7 +11,7 @@ admin.site.register(Blog , BlogAdmin)
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ("date", "user")
-    list_filter = ("date" , "user" , "received" )
+    list_filter = ("date" , "user")
     search_fields = ("user" ,)
 
 admin.site.register(Order , OrderAdmin)
@@ -30,3 +31,6 @@ admin.site.register(List)
 admin.site.register(OrderItem)
 admin.site.register(Category)
 admin.site.register(Nums)
+admin.site.register(Brand)
+admin.site.register(ColorNum)
+admin.site.register(Advertising)

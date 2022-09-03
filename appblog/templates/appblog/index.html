@@ -58,6 +58,10 @@
       <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
     </div>
   </div>
+  <p>max_tags</p>
+{% for post in max_tags %}
+      <a href="{% url 'appblog:tag_list' post.id %}" class="btn btn-primary">{{post.name}}</a>
+  {% endfor %}
   {% endfor %}
 
     {% endblock %}

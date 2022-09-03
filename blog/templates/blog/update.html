@@ -11,21 +11,12 @@
     <form  enctype="multipart/form-data" method="POST">
         {% csrf_token %}
         {{form.as_p}}
+
+        {% for post in brands %}
+        <label>{{post.brand}}</label>
+        <input type="checkbox" name="brand" value="{{post.brand}}">
+        {% endfor %}
         add
-        <br>
-        color
-        <br>
-        {% for post in colors %}
-        <label>{{post.color}}</label>
-        <input type="checkbox" name="color" value="{{post.color}}">
-        {% endfor %}
-        <br>
-        size
-        <br>
-        {% for post in sizes %}
-        <label>{{post.size}}</label>
-        <input type="checkbox" name="size" value="{{post.size}}">
-        {% endfor %}
         <br>
         category
         <br>
@@ -34,28 +25,42 @@
         <input type="checkbox" name="category" value="{{post.titel}}">
         {% endfor %}
         <br>
-
-        remove
-        <br>
         color
         <br>
-        {% for post in mycolors %}
+        {% for post in colors %}
         <label>{{post.color}}</label>
-        <input type="checkbox" name="colors" value="{{post.color}}">
+        <input type="checkbox" name="color" value="{{post.color}}">
         {% endfor %}
         <br>
+
         size
         <br>
-        {% for post in mysizes %}
+        {% for post in sizes %}
         <label>{{post.size}}</label>
-        <input type="checkbox" name="sizes" value="{{post.size}}">
+        <input type="checkbox" name="size" value="{{post.size}}">
         {% endfor %}
         <br>
+
+        remove
+<br>
         category
         <br>
         {% for post in mycategory %}
         <label>{{post.titel}}</label>
         <input type="checkbox" name="categorys" value="{{post.titel}}">
+        {% endfor %}
+        colors
+        <br>
+        {% for post in mycolor %}
+        <label>{{post.titel}}</label>
+        <input type="checkbox" name="colors" value="{{post.color}}">
+        {% endfor %}
+        <br>
+        sizes
+        <br>
+        {% for post in mysize %}
+        <label>{{post.size}}</label>
+        <input type="checkbox" name="sizes" value="{{post.size}}">
         {% endfor %}
         <br>
           <input type="submit" value="update">

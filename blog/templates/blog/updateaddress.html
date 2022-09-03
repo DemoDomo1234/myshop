@@ -125,6 +125,8 @@ body {font-family: Arial, Helvetica, sans-serif;}
 <div id="map" style="width: 1000px; height: 500px"></div>
 
 <form method="POST" >
+  {% csrf_token %}
+
   <h1>When you select a location the coordinates are auto filled</h1>
 
   <label for="latitude"><b>Latitude</b></label>

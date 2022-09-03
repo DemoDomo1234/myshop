@@ -22,6 +22,34 @@ class ComentsForm(forms.Form):
     bad = forms.CharField(widget = forms.Textarea)
     good = forms.CharField(widget = forms.Textarea)
 
+    def clean(self):
+ 
+        super(ComentsForm, self).clean()
+         
+        titel = self.cleaned_data.get('titel')
+        body = self.cleaned_data.get('body')
+        bad = self.cleaned_data.get('bad')
+        good = self.cleaned_data.get('good')
+ 
+        if len(titel) < 5 :
+            self._errors['titel'] = self.error_class([
+                'titel minimum 5 characters required'])
+
+        if len(body) < 5 :
+            self._errors['body'] = self.error_class([
+                'body minimum 5 characters required'])
+
+        if len(bad) < 5 :
+            self._errors['bad'] = self.error_class([
+                'bad minimum 5 characters required'])
+
+        if len(good) < 5 :
+            self._errors['good'] = self.error_class([
+                'good minimum 5 characters required'])
+ 
+ 
+        return self.cleaned_data
+
 class UpdateComentsForm(forms.Form):
     choices = (
         ('y' , 'yes'),
@@ -44,13 +72,102 @@ class UpdateComentsForm(forms.Form):
     bad = forms.CharField(widget = forms.Textarea)
     good = forms.CharField(widget = forms.Textarea)
 
+    def clean(self):
+ 
+        super(UpdateComentsForm, self).clean()
+         
+        titel = self.cleaned_data.get('titel')
+        body = self.cleaned_data.get('body')
+        bad = self.cleaned_data.get('bad')
+        good = self.cleaned_data.get('good')
+ 
+        if len(titel) < 5 :
+            self._errors['titel'] = self.error_class([
+                'titel minimum 5 characters required'])
 
-from django import forms
+        if len(body) < 5 :
+            self._errors['body'] = self.error_class([
+                'body minimum 5 characters required'])
+
+        if len(bad) < 5 :
+            self._errors['bad'] = self.error_class([
+                'bad minimum 5 characters required'])
+
+        if len(good) < 5 :
+            self._errors['good'] = self.error_class([
+                'good minimum 5 characters required'])
+ 
+ 
+        return self.cleaned_data
 
 class ComentsBlogForm(forms.Form):
     titel = forms.CharField(max_length=100 )
     body = forms.CharField(widget = forms.Textarea)
 
+    def clean(self):
+ 
+        super(ComentsBlogForm, self).clean()
+         
+        titel = self.cleaned_data.get('titel')
+        body = self.cleaned_data.get('body')
+ 
+        if len(titel) < 5 :
+            self._errors['titel'] = self.error_class([
+                'titel minimum 5 characters required'])
+
+        if len(body) < 5 :
+            self._errors['body'] = self.error_class([
+                'body minimum 5 characters required'])
+ 
+        return self.cleaned_data
+
 class UpdateComentsBlogForm(forms.Form):
     titel = forms.CharField(max_length=100)
     body = forms.CharField(widget = forms.Textarea)
+
+    def clean(self):
+ 
+        super(UpdateComentsBlogForm, self).clean()
+         
+        titel = self.cleaned_data.get('titel')
+        body = self.cleaned_data.get('body')
+ 
+        if len(titel) < 5 :
+            self._errors['titel'] = self.error_class([
+                'titel minimum 5 characters required'])
+
+        if len(body) < 5 :
+            self._errors['body'] = self.error_class([
+                'body minimum 5 characters required'])
+ 
+        return self.cleaned_data
+
+class CustionForm(forms.Form):
+    custion_body = forms.CharField(widget = forms.Textarea )
+
+    def clean(self):
+ 
+        super(CustionForm, self).clean()
+         
+        custion_body = self.cleaned_data.get('custion_body')
+
+        if len(custion_body) < 5 :
+            self._errors['custion_body'] = self.error_class([
+                'custion_body minimum 5 characters required'])
+
+        return self.cleaned_data
+
+class UpdateCustionForm(forms.Form):
+    body = forms.CharField(widget = forms.Textarea)
+
+    def clean(self):
+ 
+        super(UpdateCustionForm, self).clean()
+         
+        body = self.cleaned_data.get('body')
+
+        if len(body) < 5 :
+            self._errors['body'] = self.error_class([
+                'body minimum 5 characters required'])
+
+        return self.cleaned_data

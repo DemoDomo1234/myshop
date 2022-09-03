@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<p>{{order.price}}</p>
+{% for post in item %}
+<div class="card" style="width: 18rem;">
+    <img src="{{post.blog.image.url}}" class="card-img-top" alt="...">
+    <div class="card-body">
+      <h5 class="card-title">{{post.blog.titel}}</h5>
+      <p class="card-text">{{post.blog.price}}</p>
+      <p class="card-text">{{post.blog.discount}}</p>
+      <a href="{% url 'blog:detail' post.blog.id %}" class="btn btn-primary">detail</a>
+    </div>
+  </div>
+  {% endfor %}
+  {% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load blog_tags %}
+{% block content %}
+    {% for post in item %}
+    <div class="card" style="width: 18rem;">
+        <img src="{{post.blog.image.url}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{post.blog.titel}}</h5>
+          <p class="card-text">{{post.blog.price}}</p>
+          <p class="card-text">{{post.blog.discount}}</p>
+          <a href="{% url 'blog:detail' post.blog.id %}" class="btn btn-primary">detail</a>
+        </div>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="number" id="{{post.id}}"  name="num" min="1" max="{{post.blog.number}}" readonly>
+        <button type="button" onclick="f1()">+</button>
+        <button type="button" onclick="f2()">-</button>
+        <script>
+          var a = {{post.num}} ;
+          document.getElementById("{{post.id}}").value = a ;
+
+          function f1()
+          {
+            a += 1 ;
+
+            if (a > {{post.blog.number}}){
+              a = {{post.blog.number}} ;
+            }
+            document.getElementById("{{post.id}}").value = a ;
+
+          }
+          function f2()
+          {
+            a -= 1 ;
+            if (a == 0){
+              a = 1 ;
+            }
+            document.getElementById("{{post.id}}").value = a ;
+
+          }
+        </script>
+        
+      {% comment %} {% sum_sale post.price post.discount num %} {% endcomment %}
+        
+    {% endfor %} 
+    {% for myaddress in address %}
+    <label>{{myaddress.name}}</label>
+    <input type="radio" name = "address" value = "{{myaddress.name}}">
+    {% endfor %}
+    <label>time</label>
+    <input type="datetime-local" name = "time">
+    <label>online</label>
+    <input type="radio" name = "payment" value = "online">
+
+    <label>cash</label>
+    <input type="radio" name = "payment" value = "cash">
+
+
+
+    <input type="submit" value="next">
+</form>
+    {% endblock %}
+    
+
+

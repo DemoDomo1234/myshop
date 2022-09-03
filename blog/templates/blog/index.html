@@ -11,6 +11,12 @@
         </div>
       </nav>
 
+
+
+      {% for post in advertising %}
+          <a href="{% url 'blog:brand_list' post.brand.id %}"><img src="{{post.image.url}}"></a>
+        {% endfor %}
+
     {% for post in blog %}
     <div class="card" style="width: 18rem;">
         <img src="{{post.image.url}}" class="card-img-top" alt="...">
@@ -21,7 +27,7 @@
         </div>
       </div>
       {% endfor %}
-<p>-----------------------------------------------------------------------------------------</p>
+ <p>-----------------------------------------------------------------------------------------</p>
     <p>discounts</p>
     {% for post in myblog %}
     <div class="card" style="width: 18rem;">
@@ -36,7 +42,7 @@
 
 <p>-----------------------------------------------------------------------------------------</p>
     <p>max_sale</p>
-    {% for post in num_max %}
+    {% for post in max_sale %}
     <div class="card" style="width: 18rem;">
         <img src="{{post.image.url}}" class="card-img-top" alt="...">
         <div class="card-body">
@@ -45,6 +51,22 @@
           <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
         </div>
       </div>
+      {% endfor %} 
+
+      <p>-----------------------------------------------------------------------------------------</p>
+    <p>max_brand</p>
+    {% for post in max_brand %}
+
+          <a href="{% url 'blog:brand_list' post.id %}" class="btn btn-primary">{{post.brand}}</a>
+
       {% endfor %}
 
+      <p>-----------------------------------------------------------------------------------------</p>
+
+      <p>max_category</p>
+      {% for post in max_category %}
+  
+            <a href="{% url 'blog:category_list' post.id %}" class="btn btn-primary">{{post.brand}}</a>
+  
+        {% endfor %}
     {% endblock %}

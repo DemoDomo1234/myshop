@@ -1,4 +1,4 @@
-from django.shortcuts import redirect , render , get_object_or_404 
+from django.shortcuts import redirect , get_object_or_404  , render 
 from .models import MyBlog , Nums
 from .forms import CreateForm ,  SearchForm 
 from django.contrib.postgres.search import TrigramSimilarity
@@ -7,35 +7,39 @@ from coment.models import ComentsBlog
 from django.core.paginator import Paginator
 from django.db.models import Count , Max
 from taggit.models import Tag 
-from blog.models import Images
+from blog.models import Blog , Category
 
 def home(request):
-    blog = MyBlog.objects.all()
-    max_view = MyBlog.objects.filter(nums__gt = 1000)
+    blog = {}
+    max_tag = Tag.objects.filter(myblog__nums__view__gt = 1000)
+    max_view = MyBlog.objects.filter(nums__view__gt = 1000 , published = True)
     form = SearchForm()
     if 'search' in request.GET :
         form = SearchForm(request.GET)
         if form.is_valid():
             search = form.cleaned_data['search']
-            blog = blog.annotate(blogsearch=TrigramSimilarity('titel', search),).filter(
-            blogsearch__gt=0.3).order_by('-blogsearch')
-    page = Paginator(blog, 15)
-    lists = request.GET.get('page' , 1)
-    blog = page.get_page(lists)
+            blog = MyBlog.objects.annotate(blogsearch=TrigramSimilarity('titel', search),).filter(
+            blogsearch__gt=0.3 , published = True).order_by('-blogsearch')
+            page = Paginator(blog, 1)
+            lists = request.GET.get('page' , 1)
+            blog = page.get_page(lists)
     return render(request , 'appblog/index.html' , {'blog':blog ,
-     'form':form , 'max_view':max_view})
+     'form':form , 'max_view':max_view , 'max_tag':max_tag})
 
 def detail(request , id):
     blog = get_object_or_404(MyBlog , id = id)
-    images = Images.objects.filter(myblog = blog)
     num = Nums.objects.get(model=blog)
-    num.num += 1
-    num.save()
+    tags = blog.tags.all()
+    category = blog.category.all()
     tag = blog.tags.values_list('id' , flat = True)
-    blogs = MyBlog.objects.filter(tags__in = tag).exclude(id = blog.id)
+    blogs = MyBlog.objects.filter(tags__in = tag , published = True).exclude(id = blog.id)
     appblogs = blogs.annotate(tags_count = Count('tags')).order_by('-tags_count')
+    prodacts = Blog.objects.filter(tags__in = tag , published = True)
+    app_prodacts = prodacts.annotate(tags_count = Count('tags')).order_by('-tags_count')
     user = request.user
     if user.is_authenticated :
+        if user not in num.view.all() :
+            num.view.add(user)
         if request.method == 'POST' :
             form = ComentsBlogForm(request.POST)
             if form.is_valid():
@@ -44,11 +48,24 @@ def detail(request , id):
                 text = ComentsBlog.objects.create(body = body , user = user ,
                 appblog = blog , titel=titel  )
                 text.save()
+                return redirect('appblog:detail' , id)
         else:
             form = ComentsBlogForm()
-    coments = ComentsBlog.objects.filter(appblog = blog)
-    return render(request , 'appblog/detail.html' , {'blog':blog ,
-    'form':form , 'coments':coments , 'appblogs':appblogs , 'images':images})
+    else:
+        return redirect('account:login')
+    coments = ComentsBlog.objects.filter(appblog = blog , published = True)
+    if blog.status == 's' and user.is_special or user.is_superuser :
+        context = {'blog':blog ,'form':form , 'coments':coments , 'appblogs':appblogs ,
+         'tags':tags , 'app_prodacts':app_prodacts , 'category':category}
+    elif blog.status == 'n' :
+        context = {'blog':blog ,'form':form , 'coments':coments , 'appblogs':appblogs ,
+         'tags':tags , 'app_prodacts':app_prodacts , 'category':category}
+    elif blog.status == 'd' and user.is_staff or user.is_admin or user.is_superuser :
+        context = {'blog':blog ,'form':form , 'coments':coments , 'appblogs':appblogs ,
+         'tags':tags , 'app_prodacts':app_prodacts , 'category':category}
+    else:
+        return redirect('appblog:list')
+    return render(request , 'appblog/detail.html' , context)
 
 def create(request):
     user = request.user
@@ -69,20 +86,25 @@ def create(request):
                             titel = titel , body = body ,
                             image = image , music = music , film = film , author = author,)
                         blog.category.set(category)
-                        blog.save()
-                        num = Nums.objects.create(model=blog , num=0)
-                        num.save()
-                        return redirect('appblog:list')
                         for tag in tags :
                             blog.tags.add(tag)
+                        num = Nums.objects.create(model=blog)
+                        num.save()
+                        blog.save()
+
+                        return redirect('appblog:detail' , blog.id)
             else:
                 form = CreateForm()
+        else:
+            return redirect('appblog:list')
+    else:
+        return redirect('account:login')
 
     return render(request , 'appblog/create.html' , {'form':form})    
 
 def update(request , id):
     blog = get_object_or_404(MyBlog , id = id)
-    form = CreateForm(request.POST or None , request.FILES or None , instance=blog)
+    form = CreateForm(request.POST , request.FILES  , instance=blog)
     user = request.user
     if user.is_authenticated :
         if user.is_seller == True :
@@ -90,12 +112,13 @@ def update(request , id):
                 if request.method == 'POST' :
                     if form.is_valid():
                         form.save()
-                        return redirect('appblog:list')
-
-                        for tag in form.cleaned_data['tags'] :
-                            blog.tags.add(tag)
+                        return redirect('appblog:detail' , id)
                 else:
                     form = CreateForm()
+            else:
+                return redirect('appblog:list')
+        else:
+            return redirect('account:login')
     return render(request , 'appblog/update.html' , {'form':form})
 
 def delete(request , id):
@@ -107,27 +130,36 @@ def delete(request , id):
                 if request.method == 'POST' :
                     blog.image.delete() 
                     blog.delete()
+                    return redirect('appblog:list')
+            else:
+                return redirect('appblog:list')
+        else:
+            return redirect('appblog:list')
+    else:
+        return redirect('account:login')
+        
+
     return render(request , 'appblog/delete.html')
 
 def like(request , id):
-    blog = MyBlog.objects.get(id = id)
+    blog = get_object_or_404(MyBlog , id = id)
     user = request.user
     if user.is_authenticated :
         if user not in blog.likes.all() :
             blog.likes.add(user)
-    return redirect( 'appblog:detail' , id)
-
+            return redirect( 'appblog:detail' , id)
+    else:
+        return redirect('account:login')
+    
 def unlike(request , id):
     blog = get_object_or_404(MyBlog , id = id)
     user = request.user
     if user.is_authenticated :
         if user in blog.likes.all() :
             blog.likes.remove(user)
-    return redirect( 'appblog:detail' , id)
-
-def likes(request):
-    blog = MyBlog.objects.filter(likes = request.user)
-    return render(request , 'appblog/likes.html' , {'blog' : blog })
+            return redirect( 'appblog:detail' , id)
+    else:
+        return redirect('account:login')
 
 def saved(request , id):
     blog = get_object_or_404(MyBlog , id = id)
@@ -135,7 +167,9 @@ def saved(request , id):
     if user.is_authenticated :
         if user not in blog.saved.all() :
             blog.saved.add(user)
-    return redirect( 'appblog:detail' , id)
+            return redirect( 'appblog:detail' , id)
+    else:
+        return redirect('account:login')
 
 def unsaved(request , id):
     blog = get_object_or_404(MyBlog , id = id)
@@ -143,8 +177,16 @@ def unsaved(request , id):
     if user.is_authenticated :
         if user  in blog.saved.all() :
             blog.saved.remove(user)
-    return redirect( 'appblog:detail' , id)
+            return redirect( 'appblog:detail' , id)
+    else:
+        return redirect('account:login')
 
-def saveds(request):
-    blog = MyBlog.objects.filter(saved = request.user)
-    return render(request , 'appblog/saveds.html' , {'blog' : blog })
+def tag_list(request , id):
+    tags = Tag.objects.get(id = id)
+    blog = MyBlog.objects.filter(tags = tags , published = True)
+    return render(request , 'appblog/tag-list.html' , {'blog':blog})
+
+def category_list(request , id):
+    category = Category.objects.get(id = id)
+    blog = MyBlog.objects.filter(category = category , published = True)
+    return render(request, 'blog/category-list.html' , {'blog':blog})

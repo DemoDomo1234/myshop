@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-    <p>profile</p>
+    <h3>profile</h3>
     <labe>username</label>
-    <h2>{{user.username}}</h2>
+    <h5>{{user.username}}</h5>
     <label>name</label>
     <p>{{user.name}}</p>
     <label>familie</label>
@@ -11,6 +11,17 @@
     <p>{{user.number}}</p>
     <label>email</label>
     <p>{{user.email}}</p>
+    <label>gender</label>
+    <p>{{user.gender}}</p>
+    <label>date_of_birth</label>
+    <p>{{user.date_of_birth}}</p>
+    <label>national_code</label>
+    <p>{{user.national_code}}</p>
+    <label>date_special</label>
+    <p>{{user.date_special}}</p>
+    <a href="{% url 'account:update' user.id %}"><button class="btn btn-warning">update</button></a>
+    <a href="{% url 'account:change' user.id %}"><button class="btn btn-secondary">change password</button></a>
+
     <p>likes</p>
     {% for post in likes %}
     <div class="card" style="width: 18rem;">
@@ -60,4 +71,55 @@
                   <p>{{post.body}}</p>
               {% endfor %}
     
+      {% if user.is_seller %}
+      <p>companyseller</p>
+            <p>{{companyseller.company_name}}</p>
+            <br>
+            <label>company_name</label>
+            <p>{{companyseller.company_type}}</p>
+            <br>
+            <label>company_type</label>
+            <p>{{companyseller.fixed_number}}</p>
+            <br>
+            <label>fixed_number</label>
+            <p>{{companyseller.economic_code}}</p>
+            <br>
+            <label>economic_code</label>
+            <p>{{companyseller.permission_to_sign}}</p>
+            <br>
+            <label>permission_to_sign</label>
+        <p>selleraccount</p>
+        <p>{{selleraccount.shop_name}}</p>
+        <label>shop_name</label>
+        <br>
+        <p>{{selleraccount.shaba_number}}</p>
+        <label>shaba_number</label>
+        <br>
+        <p>{{selleraccount.shop_number}}</p>
+        <label>shop_number</label>
+        <br>
+        <p>{{selleraccount.shop_type}}</p>
+        <label>shop_type</label>
+        <br>
+        <p>{{selleraccount.tax}}</p>
+        <label>tax</label>
+        <br>
+    <p>seller</p>
+    {% for post in seller %}
+    <p>{{post.address}}</p>
+    <p>{{post.price}}</p>
+    <p>{{post.discount}}</p>
+    <p>{{post.number}}</p>
+    <p>{{post.garanty}}</p>
+    <p>{{post.blog}}</p>
+{% endfor %}
+<p>color</p>
+{% for post in color %}
+<p>{{post.size}}</p>
+<p>{{post.color}}</p>
+<p>{{post.num}}</p>
+<p>{{post.nums}}</p>
+<p>{{post.blog}}</p>
+{% endfor %}
+      {% endif %}
 {% endblock %}

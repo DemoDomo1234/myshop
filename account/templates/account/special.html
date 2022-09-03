@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+    <form  enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <label>1</label>
+          <input type="radio" name="special" value="1">
+          <br>
+          <label>3</label>
+          <input type="radio" name="special" value="3">
+          <br>
+          <label>12</label>
+          <input type="radio" name="special" value="12">
+          <br>
+          <input type="submit" value="send" class="btn btn-secondary">
+    </form>
+    {% endblock %}

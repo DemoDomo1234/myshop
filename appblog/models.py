@@ -2,17 +2,17 @@ from django.db import models
 from account.models import User
 from django.urls import reverse
 from taggit.managers import TaggableManager
+from mdeditor.fields import MDTextField
 
 
 class MyBlog(models.Model):
     choices = (
-        ('p' , 'poblished'),
         ('d' , 'draft'),
         ('s' , 'special'),
         ('n' , 'normal'),
     )
     titel = models.CharField(max_length=100)
-    body = models.TextField()
+    body = MDTextField()
     image = models.ImageField(upload_to = 'myblog_image')
     likes = models.ManyToManyField(User , related_name='myblog_likes' , blank = True)
     saved = models.ManyToManyField(User , related_name='myblog_saved' , blank = True)
@@ -22,8 +22,8 @@ class MyBlog(models.Model):
     film = models.FileField(upload_to = 'myblog_film' , null = True , blank = True)
     music = models.FileField(upload_to = 'myblog_music' , null = True , blank = True)
     category = models.ManyToManyField('blog.Category' , related_name='myblog_categorys')
-    notifications =  models.ManyToManyField(User , related_name='myblog_notifications' , blank = True)
     tags = TaggableManager()
+    published = models.BooleanField(default=False)
 
     def get_absolute_url(self):
         return reverse("myblog:list")
@@ -32,5 +32,5 @@ class MyBlog(models.Model):
         return self.titel
 
 class Nums(models.Model):
-    num = models.PositiveIntegerField()
-    model = models.ForeignKey(MyBlog , related_name="nums", on_delete=models.CASCADE)
+    view =  models.ManyToManyField(User , related_name='view' , blank = True)
+    model = models.OneToOneField(MyBlog , related_name="nums", on_delete=models.CASCADE)

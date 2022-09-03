@@ -1,10 +1,10 @@
-<ul class="navbar-nav ml-auto">
-    {% for cat in cat.more.all %}
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'blog:category' cat.slug %}">{{cat.title}}</a>
-        {% if cat.more.all %}
-          {% include "blog/category-loop.html" %}
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul> 
+<ul class="nav-item dropdown">
+  {% for cat in cat.more_categorys.all %}
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'blog:category_list' cat.id %}">{{cat.titel}}</a>
+      {% if cat.more_categorys.all %}
+        {% include 'blog/category-loop.html' %}
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>

@@ -1,11 +1,4 @@
 {% extends 'base.html' %}
 {% block content %}
-    {% for list in listes %} 
-    <form method="post">
-        {% csrf_token %}
-        <label>{{list.titel}}</label>
-        <input type="checkbox" name="titel" value="{{list.titel}}">
-        {% endfor %} 
-        <input type="submit" value="send">
-    </form>
+
     {% endblock %}

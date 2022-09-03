@@ -1,7 +1,0 @@
-    {% extends 'base.html' %}
-    {% block content %}
-        {% for post in blog %}
-        <img src="{{post.image.url}}">
-        <h3>{{post.titel}}</h3>
-        <p>{{post.price}}</p>
-        {% endfor %}

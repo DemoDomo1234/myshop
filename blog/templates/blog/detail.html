@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% load social_share %}
+{% load crispy_forms_tags %}
+{% load blog_tags %}
+{% load myblog_tags %}
+{% load coment_tags %}
+
 {% block content %}
     <h2>{{blog.titel}}</h2>
     <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
@@ -22,82 +27,280 @@
           <span class="sr-only">Next</span>
         </a>
       </div>
-      <a href="{% url 'blog:create_image' blog.id %}">create</a>
+      <a href="{% url 'blog:create_image' blog.id %}"><button type="button" class="btn btn-success">add new image</button></a>
     <p>{{blog.body}}</p>
+    <p>{{blog.garanty}}</p>
     <p>{{blog.price}}</p>
     <p>{{blog.discount}}</p>
     <p>{{blog.time}}</p>
+    {% score_count blog %}
     <br>
+    {% sagestion_count blog %}
+    
+    <br>
+
+    <p>tags</p>
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        {% for tag in tags %}
+        <li class="breadcrumb-item"><a href="{% url 'blog:tag_list' tag.id %}">{{tag}}</a></li>
+        {% endfor %}
+      </ol>
+    </nav>
+    
     <p>category</p>
-    {% for cate in category %}
-    <a href="{% url 'blog:category_list' cate.id %}"> {{cate.titel}} </a>
-    {% endfor %}
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        {% for cate in category %}
+        <li class="breadcrumb-item"><a href="{% url 'blog:category_list' cate.id %}"> {{cate.titel}} </a></li>
+        {% endfor %}
+      </ol>
+    </nav>
     <br>
-{% post_to_facebook object_or_url "Post to Facebook!" %}
-{% post_to_twitter "New Song: {{blog.titel}}. Check it out!" object_or_url "Post to Twitter" %}
-{% post_to_telegram "New Song: {{blog.titel}}" %}
-{% post_to_whatsapp object_or_url "Post to WhatsApp" %}
-{% add_pinterest_script %}
-<a href="{% url 'blog:share' blog.id %}">share whit email</a>
-<br>
+    <br>
+    
 {% if blog.seller == request.user %}
-    <a href="{% url 'blog:update' blog.id %}">update</a>
-    <a href="{% url 'blog:delete' blog.id %}">delete</a>
+<p>{{blog.number}}</p>
+<p>{{nums.num}}</p>
+
+    <a href="{% url 'blog:update' blog.id %}"><button type="button" class="btn btn-warning">update</button></a>
+    
+<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  delete
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        
+        <h5 class="modal-title" id="exampleModalLabel">{{blog.titel}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        delete this post
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a href="{% url 'blog:delete' blog.id %}"><button type="button" class="btn btn-danger">delete</button></a>
+
+      </div>
+    </div>
+  </div>
+</div>
     {% endif %}
-    {% if user in blog.like.all %}
-    <a href="{% url 'blog:unlike' blog.id %}"><button>unlike</button></a>
+
+  
+     {% if user in blog.notifications.all %}
+    <a href="{% url 'blog:un_notifications' blog.id %}"><img src="../../../media/site/unnotyficition.jpg" style="width: 50px; height: 30px;"></a>
     {% else %}
-    <a href="{% url 'blog:like' blog.id %}"><button>like</button></a>
+    <a href="{% url 'blog:notifications' blog.id %}"><img src="../../../media/site/notyficition.jpg" style="width: 50px; height: 30px;"></a>
     {% endif %}
+        <!-- Button trigger modal -->
+
+        <img data-bs-target="#staticBackdrop" data-bs-toggle="modal" src="../../../media/site/share.jpg" style="width: 50px; height: 30px;">
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">share post whit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                {% post_to_facebook object_or_url '<img src="../../../media/site/facebook.jpg" style="width: 50px; height: 30px;">' %}
+                {% post_to_twitter "New Song: {{blog.titel}}. Check it out!" object_or_url '<img src="../../../media/site/twitter.jpg" style="width: 50px; height: 30px;">' %}
+                {% post_to_telegram "New Song: {{blog.titel}}. Check it out!" object_or_url '<img src="../../../media/site/telegram.jpg" style="width: 50px; height: 30px;">' %}
+                {% post_to_whatsapp object_or_url '<img src="../../../media/site/watsapp.jpg" style="width: 50px; height: 30px;">' %}
+                {% add_pinterest_script %}
+                <a href="{% url 'blog:share' blog.id %}"><img src="../../../media/site/email.jpg" style="width: 50px; height: 30px;"> </a>
+              </div>
+            </div>
+          </div>
+        </div>
+{% like_count blog %}
+{% if user in blog.like.all %}
+<a href="{% url 'blog:unlike' blog.id %}"><img src="../../../media/site/unlike.jpg" style="width: 50px; height: 30px;"></a>
+{% else %}
+<a href="{% url 'blog:like' blog.id %}"><img src="../../../media/site/like.jpg" style="width: 50px; height: 30px;"></a>
+{% endif %}
+<p>
+  <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWidthExample" aria-expanded="false" aria-controls="collapseWidthExample">
+    <img src="../../../media/site/list.jpg" style="width: 50px; height: 30px;">
+    
+  </button>
+</p>
+<div style="min-height: 120px;">
+  <div class="collapse collapse-horizontal" id="collapseWidthExample">
+    <div class="card card-body" style="width: 300px;">
+      {% for list in lists %}
+      <form method='post' action="{% url 'blog:lists' blog.id %}">
+        {% csrf_token %}
+        <label>{{list.titel}}</label>
+        <input type="checkbox" value="{{list.titel}}" name='titel'>
+      {% endfor %} 
+      <input type="submit" value="send">
+      </form>
+      <a href="{% url 'blog:create_list' %}">create list</a>
+    </div>
+  </div>
+</div>
+<br>
+  blogs
+{% for post in blogs %}
+    <div class="card" style="width: 18rem;">
+        <img src="{{post.image.url}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{post.titel}}</h5>
+          <p class="card-text">{{post.price}}</p>
+          <a href="{% url 'appblog:detail' post.id %}" class="btn btn-primary">detail</a>
+        </div>
+      </div>
+      {% endfor %}
+    <br>
     {% if blog.number > 0 %}
-    {% if user in blog.cart.all %}
-    <a href="{% url 'blog:unshop' blog.id %}"><button>delete</button></a>
-    {% else %}
     <form method="post" action="{% url 'blog:shop' blog.id %}">
       {% csrf_token %}
-    {% for color in color %}
-    <label>{{color.color}}</label>
-    <input type="radio" name="color" value+"{{color.color}}">
+    {% for post in blog.color.all %}
+    <label>{{post.color}}</label>
+    <input type="radio" id="{{post.color}}" name="color" value="{{post.color}}">
+    
     {% endfor %}
     <br>
-    {% for size in size %}
+    {% for size in blog.sizes.all %}
     <label>{{size.size}}</label>
-    <input type="radio" name="size" value+"{{size}}">
+    <input type="radio" name="size" value="{{size.size}}">
     {% endfor %}
-    <a href="{% url 'blog:shop' blog.id %}"><button>cart</button></a>
+    <label>{{blog.seller.username}}</label>
+    <input type="radio" name="seller" value="{{blog.seller}}">
+    {% for seller in sellers %}
+    <label>{{seller.user.username}}</label>
+    <input type="radio" name="seller" value="{{seller}}">
+    {% endfor %}
+    <br>
+    <button type="button" onclick="f1()">+</button>
+    <button type="button" onclick="f2()">-</button>
+    <input type="number" id="{{blog.id}}" name="num" min="1" max="{{blog.number}}" readonly>
+    <input type="image" src="../../../media/site/shop.jpg"  alt="Submit Form" style="width: 50px; height: 30px;">
     </form>
-    {% endif %}
     {% else %}
     <p>not in shop</p>
     {% endif %}
-    {% if user in blog.notifications.all %}
-    <a href="{% url 'blog:un_notifications' blog.id %}"><button>un_notifications</button></a>
-    {% else %}
-    <a href="{% url 'blog:notifications' blog.id %}"><button>notifications</button></a>
-    {% endif %}
-    <a href="{% url 'blog:lists' blog.id %}">add to list</a>
-    
+    <script>
+      var a = 1 ;
+      document.getElementById("{{blog.id}}").value = a ;
+
+      function f1()
+      {
+        a += 1 ;
+
+        if (a > {{blog.number}}){
+          a = {{blog.number}} ;
+        }
+        document.getElementById("{{blog.id}}").value = a ;
+
+      }
+      function f2()
+      {
+        a -= 1 ;
+        if (a == 0){
+          a = 1 ;
+        }
+        document.getElementById("{{blog.id}}").value = a ;
+
+      }
+      function f3()
+      {
+       var color ;
+       color = document.getElementById("color").value 
+       alert(color) 
+      }
+    </script>
+ <br>
     <p>create coments</p>
     <br>
-    <form method="POST">
+    <form enctype="multipart/form-data" method="post">
         {% csrf_token %}
-        {{form.as_p}}
-        <input type="submit" value="create">
+        {{form1|crispy}}
+        <input class="btn btn-primary" type="submit" value="create">
     </form>
     <br>
     <p>coments</p>
     <br>
+    {% coment_count blog %}
     {% for text in coments %}
     <p>{{text.body}}</p>
     <p>{{text.user}}</p>
     <p>{{text.date}}</p>
-    <a href="{% url 'coment:unlikes' text.id %}"><button>like</button></a>
-    <a href="{% url 'coment:likes' text.id %}"><button>unlike</button></a>
+    {% coment_like_count text %}
+
+    {% if user in text.likes.all %}
+<a href="{% url 'coment:blog_likes' text.id %}"><img src="../../../media/site/off_like.jpg" style="width: 50px; height: 30px;"></a>
+{% else %}
+<a href="{% url 'coment:blog_likes' text.id %}"><img src="../../../media/site/on_like.jpg" style="width: 50px; height: 30px;"></a>
+{% endif %}
+{% coment_unlike_count text %}
+
+{% if user in text.unlikes.all %}
+<a href="{% url 'coment:blog_unlikes' text.id %}"><img src="../../../media/site/off_unlike.jpg" style="width: 50px; height: 30px;"></a>
+{% else %}
+<a href="{% url 'coment:blog_unlikes' text.id %}"><img src="../../../media/site/on_unlike.jpg" style="width: 50px; height: 30px;"></a>
+{% endif %}
     <br>
     {% if text.user == request.user %}
-    <a href="{% url 'coment:update' text.id %}">update</a>
-    <a href="{% url 'coment:delete' text.id %}">delete</a>
+    <a href="{% url 'coment:blog_update' text.id %}"><button class="btn btn-warning">update</button></a>
+    <a href="{% url 'coment:blog_delete' text.id %}"><button class="btn btn-danger">delete</button></a>
     {% endif %}
     <p>_____________________________________</p>
     {% endfor %}
+    <p>create custion</p>
+    <br>
+    <form method="post">
+        {% csrf_token %}
+        {{form2|crispy}}
+        <input class="btn btn-primary" type="submit" value="create">
+        
+    </form>
+    <br>
+    <p>custion</p>
+    <br>
+    {% custion_count blog %}
+    {% for text in custion %}
+    <p>{{text.body}}</p>
+    <p>{{text.user}}</p>
+    <p>{{text.date}}</p>
+    {% one_respones_count text %}
+    <a href="{% url 'coment:detail' text.id %}"><button>detail</button></a>
+    {% custion_like_count text %}
+
+    {% if user in text.likes.all %}
+<a href="{% url 'coment:custion_likes' text.id %}"><img src="../../../media/site/off_like.jpg" style="width: 50px; height: 30px;"></a>
+{% else %}
+<a href="{% url 'coment:custion_likes' text.id %}"><img src="../../../media/site/on_like.jpg" style="width: 50px; height: 30px;"></a>
+{% endif %}
+{% custion_unlike_count text %}
+
+{% if user in text.unlikes.all %}
+<a href="{% url 'coment:custion_unlikes' text.id %}"><img src="../../../media/site/off_unlike.jpg" style="width: 50px; height: 30px;"></a>
+{% else %}
+<a href="{% url 'coment:custion_unlikes' text.id %}"><img src="../../../media/site/on_unlike.jpg" style="width: 50px; height: 30px;"></a>
+{% endif %}
+    <br>
+    {% if text.user == request.user %}
+    <a href="{% url 'coment:custion_update' text.id %}"><button class="btn btn-warning">update</button></a>
+    <a href="{% url 'coment:custion_delete' text.id %}"><button class="btn btn-danger">delete</button></a>
+    {% endif %}
+    <p>_____________________________________</p>
+    {% endfor %}
+        <script>
+        const myModal = document.getElementById('myModal')
+        const myInput = document.getElementById('myInput')
+    
+        myModal.addEventListener('shown.bs.modal', () => {
+          myInput.focus()
+    })
+    </script>
     {% endblock %}

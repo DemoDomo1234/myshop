@@ -10,4 +10,10 @@ urlpatterns = [
     path('blog-delete/<id>' , blog_delete , name = 'blog_delete'),
     path('blog-likes/<id>' , blog_likes , name = 'blog_likes'),
     path('blog-unlikes/<id>' , blog_unlikes , name = 'blog_unlikes'),
+    path('custion-update/<id>' , custion_update , name = 'custion_update'), 
+    path('custion-delete/<id>' , custion_delete , name = 'custion_delete'),
+    path('custion-likes/<id>' , custion_likes , name = 'custion_likes'),
+    path('custion-unlikes/<id>' , custion_unlikes , name = 'custion_unlikes'),
+    path('detail/<id>' , detail , name='detail'),
+    path('create/<id>' , create_custion , name='create'),
 ]
