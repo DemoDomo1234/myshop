@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="number" id="{{item.id}}"  name="num" readonly>
+        <button type="button" onclick="f1()">+</button>
+        <button type="button" onclick="f2()">-</button>
+        <input type='submit' value='next'>
+    </form>
+
+        <script>
+          var a = {{item.num}} ;
+          document.getElementById("{{item.id}}").value = a ;
+
+          function f1()
+          {
+            a += 1 ;
+
+            if (a > {{item.seller.number}}){
+              a = {{item.seller.number}} ;
+            }
+            document.getElementById("{{item.id}}").value = a ;
+
+    
+          }
+          function f2()
+          {
+            a -= 1 ;
+            if (a == 0){
+              a = 1 ;
+            }
+            document.getElementById("{{item.id}}").value = a ;
+
+          }
+        </script>
+    {% endblock %}
+        

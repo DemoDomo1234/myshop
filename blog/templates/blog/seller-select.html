@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<form method="post" action="{% url 'blog:inter' %}">
+    {% csrf_token %}
+{% for color in colors %}
+<label>{{color.seller}}</label>
+<input type="radio" name="seller" value="{{color.seller.id}}">
+<input type="hidden" name="id" value="{{color.id}}">
+{% endfor %}
+<input type='submit' value='next'>
+
+</form>
+{% endblock %}
+

@@ -15,29 +15,36 @@
         {% csrf_token %}
         {{ form.media }}
         {{form|crispy}}
-          <br>
-          address
-          {% for post in addresses %}
-          <label>{{post.name}}</label>
-          <input type="radio" name="address" value="{{post.name}}">
-          {% endfor %}
-          <br>
           category
           <br>
-          {% for posts in category %}
-          <label>{{posts.titel}}</label>
-          <input type="checkbox" name="category" value="{{posts.titel}}">
+          {% for post in category %}
+          <label>{{post.titel}}</label>
+          <input type="checkbox" name="category" value="{{post.titel}}">
           {% endfor %}
-          <br>
           <br>
           brand
           <br>
           {% for posts in brands %}
           <label>{{posts.brand}}</label>
-          <input type="checkbox" name="brand" value="{{posts.brand}}">
+          <input type="radio" name="brand" value="{{posts.brand}}">
           {% endfor %}
           <br>
-          <input type="submit" value="create">
+          <br>
+          colors
+          <br>
+          {% for post in colors %}
+          <label>{{post.color}}</label>
+          <input type="checkbox" name="color" value="{{post.color}}">
+          {% endfor %}
+          <br>
+          sizes
+          <br>
+          {% for post in sizes %}
+          <label>{{post.size}}</label>
+          <input type="checkbox" name="size" value="{{post.size}}">
+          {% endfor %}
+          <br>
+          <input class="btn btn-primary" type="submit" value="create">
     </form>
     <a href="{% url 'blog:create_category' %}">create category</a>
     {% endblock %}

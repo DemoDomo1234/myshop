@@ -136,13 +136,14 @@ body {font-family: Arial, Helvetica, sans-serif;}
   <input id='ipid2' type="float" placeholder="longitude" name="longitude" required>
 
   {{form.as_p}}
-  <button type="submit">save</button>
+  <button class="btn btn-warning" type="submit">save</button>
 </form>
 
 <!-- Get the leaflet JavaScript file -->
 
 <script>
 var map = L.map('map').setView([11,79], 7);
+var num = 0 ;
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -153,15 +154,19 @@ var map = L.map('map').setView([11,79], 7);
   map.on('click', (e)=>{
     gcs.reverse().latlng(e.latlng).run((err, res)=>{
       if(err) return;
+      if(num < 1){
       L.marker(res.latlng).addTo(map).bindPopup(res.address.Match_addr).openPopup();
       var l1=parseFloat(res.latlng['lat']);
       var l2=parseFloat(res.latlng['lng']);
       document.getElementById("ipid1").value=l1;
-      document.getElementById("ipid2").value=l2;      
+      document.getElementById("ipid2").value=l2;  
+      num += 1 ;
+      }    
     });
-
   });
-
+  function openForm() {
+    document.getElementById("myForm").style.display = "block";
+  }
 
 </script>
 

@@ -1,13 +1,19 @@
 from django import forms
+from .models import User
+from django.contrib.auth import authenticate
 
 class SingupForm(forms.Form):
+    choices = (
+        ('m' , 'man'),
+        ('w' , 'wonamn'),
+    )
     username = forms.CharField(max_length=20)
     name = forms.CharField(max_length=20)
     familie = forms.CharField(max_length=20)
     email = forms.EmailField()
     number = forms.CharField(max_length=11)
     password = forms.CharField(widget= forms.PasswordInput)
-    gender = forms.BooleanField()
+    gender = forms.CharField(max_length=200 , widget = forms.Select(choices=choices))
     date_of_birth = forms.DateField()
     national_code = forms.CharField(max_length=10)
     
@@ -18,13 +24,19 @@ class SingupForm(forms.Form):
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
         number = self.cleaned_data.get('number')
+        name = self.cleaned_data.get('name')
+        familie = self.cleaned_data.get('familie')
         national_code = self.cleaned_data.get('national_code')
 
-
- 
         if len(username) < 5 :
             self._errors['username'] = self.error_class([
                 'username minimum 5 characters required'])
+        if len(name) < 5 :
+            self._errors['name'] = self.error_class([
+                'name minimum 5 characters required'])
+        if len(familie) < 5 :
+            self._errors['familie'] = self.error_class([
+                'familie minimum 5 characters required'])
         is_str = False
         for x in password :
             if x.isalpha() :
@@ -57,14 +69,51 @@ class SingupForm(forms.Form):
         if national_code.isdigit() == False :
             self._errors['national_code'] = self.error_class([
                 'national_code just number'])
+        if name.isalpha() == False :
+            self._errors['name'] = self.error_class([
+                'name just str'])
+        if familie.isalpha() == False :
+            self._errors['familie'] = self.error_class([
+                'familie just str'])
 
- 
+        is_username = True
+        try :
+            myusername = User.objects.get(username = username)
+        except :
+            is_username = False
+        if is_username == False :
+            self._errors['username'] = self.error_class([
+                'username it was'])
         return self.cleaned_data
 
 class LoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(LoginForm, self).__init__(*args, **kwargs)
+        
+    def clean(self):
+ 
+        super(LoginForm, self).clean()
+         
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+        is_username = True
+        try :
+            myusername = User.objects.get(username = username)
+        except :
+            is_username = False
+        user = authenticate(self.request , username = username , password = password)
+        if is_username == False :
+            self._errors['username'] = self.error_class([
+                'username is not true'])
+        elif user is None :
+            self._errors['password'] = self.error_class([
+                'password is not true'])
 
+        return self.cleaned_data
+ 
 class ChangepassForm(forms.Form):
     password_one = forms.CharField(widget= forms.PasswordInput)
     password_tow = forms.CharField(widget= forms.PasswordInput)   
@@ -99,7 +148,8 @@ class ChangepassForm(forms.Form):
         if password_one != password_tow :
             self._errors['password_one'] = self.error_class([
                 'Password1 == password2'])
- 
+        return self.cleaned_data
+        
 class UpdateForm(forms.Form):
     username = forms.CharField(max_length=20)
     name = forms.CharField(max_length=20)
@@ -113,19 +163,38 @@ class UpdateForm(forms.Form):
     date_of_birth = forms.DateField()
     national_code = forms.CharField(max_length=10)
     
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(UpdateForm, self).__init__(*args, **kwargs)
+        
+
     def clean(self):
  
         super(UpdateForm, self).clean()
          
         username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
         password_one = self.cleaned_data.get('password_one')
         password_tow = self.cleaned_data.get('password_tow')
         number = self.cleaned_data.get('number')
         national_code = self.cleaned_data.get('national_code')
+        name = self.cleaned_data.get('name')
+        familie = self.cleaned_data.get('familie')
+        myuser = User.objects.get(id = self.user.id)
+
+        if not myuser.check_password(password):
+            self._errors['password'] = self.error_class([
+                'password is not true'])
 
         if len(username) < 5 :
             self._errors['username'] = self.error_class([
                 'username minimum 5 characters required'])
+        if len(name) < 5 :
+            self._errors['name'] = self.error_class([
+                'name minimum 5 characters required'])
+        if len(familie) < 5 :
+            self._errors['familie'] = self.error_class([
+                'familie minimum 5 characters required'])
         is_str = False
         for x in password_one :
             if x.isalpha() :
@@ -161,14 +230,20 @@ class UpdateForm(forms.Form):
         if national_code.isdigit() == False :
             self._errors['national_code'] = self.error_class([
                 'national_code just number'])
+        if name.isalpha() == False :
+            self._errors['name'] = self.error_class([
+                'name just str'])
+        if familie.isalpha() == False :
+            self._errors['familie'] = self.error_class([
+                'familie just str'])
  
         return self.cleaned_data
    
 class CreateCompanySeller(forms.Form):
     choices = (
-        ('d' , 'draft'),
-        ('s' , 'special'),
-        ('n' , 'normal'),
+        ('d' , 'تجاری'),
+        ('s' , 'قیر تجاری'),
+        ('n' , 'شخصی'),
     )
     company_name = forms.CharField(max_length=200)
     company_type = forms.CharField(max_length=200 , widget = forms.Select(choices=choices))
@@ -181,19 +256,17 @@ class CreateCompanySeller(forms.Form):
         super(CreateCompanySeller, self).clean()
          
         company_name = self.cleaned_data.get('company_name')
-        company_type = self.cleaned_data.get('company_type')
         fixed_number = self.cleaned_data.get('fixed_number')
         economic_code = self.cleaned_data.get('economic_code')
         permission_to_sign = self.cleaned_data.get('permission_to_sign')
 
- 
+        if company_name.isalpha() == False :
+            self._errors['company_name'] = self.error_class([
+                'company_name just str'])
         if len(company_name) < 5 :
             self._errors['company_name'] = self.error_class([
                 'company_name minimum 5 characters required'])
 
-        if len(company_type) < 5 :
-            self._errors['company_type'] = self.error_class([
-                'company_type minimum 5 characters required'])
         if len(fixed_number) < 11 :
             self._errors['fixed_number'] = self.error_class([
                 'fixed_number minimum 11 characters required'])
@@ -218,14 +291,16 @@ class CreateCompanySeller(forms.Form):
 
 class CreateSellerAccount(forms.Form):
     choices = (
-        ('d' , 'draft'),
-        ('s' , 'special'),
-        ('n' , 'normal'),
+        ('1' , '1-10'),
+        ('2' , '10-100'),
+        ('3' , '100-1000'),
     )
     choice = (
-        ('d' , 'draft'),
-        ('s' , 'special'),
-        ('n' , 'normal'),
+        ('hko' , 'خوراکی'),
+        ('kha' , 'خانگی'),
+        ('b' , 'برقی'),
+        ('e' , 'الکترونیکی'),
+        ('gh' , 'قیره'),
     )
     shop_name = forms.CharField(max_length=200)
     shaba_number = forms.CharField(max_length=24)
@@ -245,6 +320,9 @@ class CreateSellerAccount(forms.Form):
             self._errors['shop_name'] = self.error_class([
                 'shop_name minimum 5 characters required'])
 
+        if shop_name.isalpha() == False :
+            self._errors['shop_name'] = self.error_class([
+                'shop_name just str'])
 
         if len(shaba_number) < 24 :
             self._errors['shaba_number'] = self.error_class([
@@ -257,9 +335,9 @@ class CreateSellerAccount(forms.Form):
 
 class UpdateCompanySeller(forms.Form):
     choices = (
-        ('d' , 'draft'),
-        ('s' , 'special'),
-        ('n' , 'normal'),
+        ('d' , 'تجاری'),
+        ('s' , 'قیر تجاری'),
+        ('n' , 'شخصی'),
     )
     company_name = forms.CharField(max_length=200)
     company_type = forms.CharField(max_length=200 , widget = forms.Select(choices=choices))
@@ -272,19 +350,19 @@ class UpdateCompanySeller(forms.Form):
         super(UpdateCompanySeller, self).clean()
          
         company_name = self.cleaned_data.get('company_name')
-        company_type = self.cleaned_data.get('company_type')
         fixed_number = self.cleaned_data.get('fixed_number')
         economic_code = self.cleaned_data.get('economic_code')
         permission_to_sign = self.cleaned_data.get('permission_to_sign')
 
  
+        if company_name.isalpha() == False :
+            self._errors['company_name'] = self.error_class([
+                'company_name just str'])
+
         if len(company_name) < 5 :
             self._errors['company_name'] = self.error_class([
                 'company_name minimum 5 characters required'])
 
-        if len(company_type) < 5 :
-            self._errors['company_type'] = self.error_class([
-                'company_type minimum 5 characters required'])
         if len(fixed_number) < 11 :
             self._errors['fixed_number'] = self.error_class([
                 'fixed_number minimum 11 characters required'])
@@ -308,14 +386,16 @@ class UpdateCompanySeller(forms.Form):
 
 class UpdateSellerAccount(forms.Form):
     choices = (
-        ('d' , 'draft'),
-        ('s' , 'special'),
-        ('n' , 'normal'),
+        ('1' , '1-10'),
+        ('2' , '10-100'),
+        ('3' , '100-1000'),
     )
     choice = (
-        ('d' , 'draft'),
-        ('s' , 'special'),
-        ('n' , 'normal'),
+        ('hko' , 'خوراکی'),
+        ('kha' , 'خانگی'),
+        ('b' , 'برقی'),
+        ('e' , 'الکترونیکی'),
+        ('gh' , 'قیره'),
     )
     shop_name = forms.CharField(max_length=200)
     shaba_number = forms.CharField(max_length=24)
@@ -334,7 +414,10 @@ class UpdateSellerAccount(forms.Form):
         if len(shop_name) < 5 :
             self._errors['shop_name'] = self.error_class([
                 'shop_name minimum 5 characters required'])
-
+        if shop_name.isalpha() == False :
+            self._errors['shop_name'] = self.error_class([
+                'shop_name just str'])
+                
         if len(shaba_number) < 24 :
             self._errors['shaba_number'] = self.error_class([
                 'shaba_number minimum 24 characters required'])

@@ -19,7 +19,7 @@
     <p>{{user.national_code}}</p>
     <label>date_special</label>
     <p>{{user.date_special}}</p>
-    <a href="{% url 'account:update' user.id %}"><button class="btn btn-warning">update</button></a>
+    <a href="{% url 'account:update_user' user.id %}"><button class="btn btn-warning">update</button></a>
     <a href="{% url 'account:change' user.id %}"><button class="btn btn-secondary">change password</button></a>
 
     <p>likes</p>

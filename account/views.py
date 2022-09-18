@@ -17,21 +17,13 @@ def signup(request):
     if request.method == 'POST':
         form = SingupForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
-            name = form.cleaned_data['name']
-            familie = form.cleaned_data['familie']
-            email = form.cleaned_data['email']
-            number = form.cleaned_data['number']
-            password = form.cleaned_data['password']
-            gender = form.cleaned_data['gender']
-            date_of_birth = form.cleaned_data['date_of_birth']
-            national_code = form.cleaned_data['national_code']
+            cd = form.cleaned_data
             user = User.objects.create(
-            username = username , name = name ,
-            familie = familie , email = email ,
-            number = number ,  password = password ,
-            gender = gender , date_of_birth = date_of_birth ,
-            national_code = national_code)
+            username = cd['username'] , name = cd['name'] ,
+            familie = cd['familie'] , email = cd['email'] ,
+            number = cd['number'] ,  password = cd['password'] ,
+            gender = cd['gender'] , date_of_birth = cd['date_of_birth'] ,
+            national_code = cd['national_code'])
             user.set_password(password)
             user.save()
             return redirect('account:login')
@@ -45,27 +37,18 @@ def update(request , id):
     if karbr.is_authenticated :
         if karbr.username == user.username :
             if request.method == 'POST':
-                form = UpdateForm(request.POST)
+                form = UpdateForm(request.POST , user=karbr)
                 if form.is_valid():
-                    username = form.cleaned_data['username']
-                    name = form.cleaned_data['name']
-                    familie = form.cleaned_data['familie']
-                    email = form.cleaned_data['email']
-                    number = form.cleaned_data['number']
-                    gender = form.cleaned_data['gender']
-                    date_of_birth = form.cleaned_data['date_of_birth']
-                    national_code = form.cleaned_data['national_code']
-                    password = form.cleaned_data['password']
-                    password_one = form.cleaned_data['password_one']
-                    if user.check_password(password) :
-                        user.username = username 
-                        user.name = name 
-                        user.familie = familie 
-                        user.email = email 
-                        user.number = number 
-                        user.gender = gender 
-                        user.date_of_birth = date_of_birth 
-                        user.national_code = national_code
+                    cd = form.cleaned_data
+                    if user.check_password(cd['password']) :
+                        user.username = cd['username'] 
+                        user.name = cd['name'] 
+                        user.familie = cd['familie'] 
+                        user.email = cd['email'] 
+                        user.number = cd['number'] 
+                        user.gender = cd['gender'] 
+                        user.date_of_birth = cd['date_of_birth'] 
+                        user.national_code = cd['national_code']
                         if karbr.is_seller :
                             user.is_seller = True
                         if karbr.is_staff :
@@ -76,11 +59,11 @@ def update(request , id):
                             user.is_active = True
                         if karbr.is_special :
                             user.is_special = True
-                        user.set_password(password_one)
+                        user.set_password(cd['password_one'])
                         user.save()
                         return redirect('account:detail' , id)
             else :
-                form = UpdateForm()
+                form = UpdateForm(user=karbr)
         else:
             return redirect('blog:list')
     else:
@@ -110,7 +93,10 @@ def detail(request , id):
                     companyseller = ''
                 selleraccount = SellerAccount.objects.get(user = user)
                 seller = BlogSeller.objects.filter(seller = user)
-                color = ColorNum.objects.filter(seller = user)
+                try :
+                  color = ColorNum.objects.filter(seller = user)
+                except :
+                    color = ''
                 content = {'user':user , 'likes':likes , 'notification':notification ,
             'orders':orders , 'ordered':ordered , 'lists':lists , 'address':address ,
             'noty':noty , 'companyseller':companyseller , 'selleraccount':selleraccount ,
@@ -121,11 +107,10 @@ def detail(request , id):
            
 def login_view(request):
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = LoginForm(request.POST , request=request)
         if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request , username = username , password = password)
+            cd = form.cleaned_data
+            user = authenticate(request , username = cd['username'] , password = cd['password'])
             if user is not None :
                 if user.is_active :
                     myuser = User.objects.get(id = user.id)
@@ -137,7 +122,7 @@ def login_view(request):
                     return redirect('blog:list')
 
     else:
-        form = LoginForm()
+        form = LoginForm(request=request)
     return render(request , 'account/login.html' , {'form':form})
 
 def logout_view(request):
@@ -167,8 +152,8 @@ def change_password(request , id):
 
 def special_view(request):
     myuser = request.user
-    user = User.objects.get(id = myuser.id)
-    if user.is_authenticated :
+    if myuser.is_authenticated :
+        user = User.objects.get(id = myuser.id)
         if request.method == 'POST':
             special = request.POST['special']
             if special == '1':
@@ -203,29 +188,30 @@ def special_view(request):
 
 def callback_gateway_view(request):
     myuser = request.user
-    user = User.objects.get(id = myuser.id)
-    tracking_code = request.GET.get(settings.TRACKING_CODE_QUERY_PARAM, None)
-    if not tracking_code:
-        logging.debug("این لینک معتبر نیست.")
-        raise Http404
+    if myuser.is_authenticated :
+        user = User.objects.get(id = myuser.id)
+        tracking_code = request.GET.get(settings.TRACKING_CODE_QUERY_PARAM, None)
+        if not tracking_code:
+            logging.debug("این لینک معتبر نیست.")
+            raise Http404
 
-    try:
-        bank_record = bank_models.Bank.objects.get(tracking_code=tracking_code)
-    except bank_models.Bank.DoesNotExist:
-        logging.debug("این لینک معتبر نیست.")
-        raise Http404
+        try:
+            bank_record = bank_models.Bank.objects.get(tracking_code=tracking_code)
+        except bank_models.Bank.DoesNotExist:
+            logging.debug("این لینک معتبر نیست.")
+            raise Http404
 
-    # در این قسمت باید از طریق داده هایی که در بانک رکورد وجود دارد، رکورد متناظر یا هر اقدام مقتضی دیگر را انجام دهیم
-    if bank_record.is_success:
-        # پرداخت با موفقیت انجام پذیرفته است و بانک تایید کرده است.
-        # می توانید کاربر را به صفحه نتیجه هدایت کنید یا نتیجه را نمایش دهید.
-        user.special = True
-        user.save()
-        return redirect('account:detail' , user.id)
+        # در این قسمت باید از طریق داده هایی که در بانک رکورد وجود دارد، رکورد متناظر یا هر اقدام مقتضی دیگر را انجام دهیم
+        if bank_record.is_success:
+            # پرداخت با موفقیت انجام پذیرفته است و بانک تایید کرده است.
+            # می توانید کاربر را به صفحه نتیجه هدایت کنید یا نتیجه را نمایش دهید.
+            user.special = True
+            user.save()
+            return redirect('account:detail' , user.id)
 
 
-    # پرداخت موفق نبوده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.
-    return HttpResponse("پرداخت با شکست مواجه شده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.")
+        # پرداخت موفق نبوده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.
+        return HttpResponse("پرداخت با شکست مواجه شده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.")
 
 def create_seller_account(request):
     user = request.user
@@ -233,18 +219,11 @@ def create_seller_account(request):
         if request.method == "POST" :
             form = CreateSellerAccount(request.POST , request.FILES)
             if form.is_valid():
-
-                shop_name = form.cleaned_data['shop_name']
-                shaba_number = form.cleaned_data['shaba_number']
-                shop_number = form.cleaned_data['shop_number']
-                shop_type = form.cleaned_data['shop_type']
-                tax = form.cleaned_data['tax']
-                national_card = form.cleaned_data['national_card']
-
+                cd = form.cleaned_data
                 seller_account = SellerAccount.objects.create(
-                        shop_name = shop_name , shaba_number = shaba_number ,
-                        shop_number = shop_number , shop_type = shop_type ,
-                        tax = tax , national_card = national_card ,
+                        shop_name = cd['shop_name'] , shaba_number = cd['shaba_number'] ,
+                        shop_number = cd['shop_number'] , shop_type = cd['shop_type'] ,
+                        tax = cd['tax'] , national_card = cd['national_card'] ,
                         user = user
                 )
                 seller_account.save()
@@ -269,20 +248,13 @@ def update_seller_account(request , id):
                 if request.method == 'POST' :
                     form = UpdateSellerAccount(request.POST , request.FILES)
                     if form.is_valid():
-
-                        shop_name = form.cleaned_data['shop_name']
-                        shaba_number = form.cleaned_data['shaba_number']
-                        shop_number = form.cleaned_data['shop_number']
-                        shop_type = form.cleaned_data['shop_type']
-                        tax = form.cleaned_data['tax']
-                        national_card = form.cleaned_data['national_card']
-
-                        seller_account.shop_name = shop_name
-                        seller_account.shaba_number = shaba_number
-                        seller_account.shop_number = shop_number
-                        seller_account.shop_type = shop_type
-                        seller_account.tax = tax
-                        seller_account.national_card = national_card
+                        cd = form.cleaned_data
+                        seller_account.shop_name = cd['shop_name']
+                        seller_account.shaba_number = cd['shaba_number']
+                        seller_account.shop_number = cd['shop_number']
+                        seller_account.shop_type = cd['shop_type']
+                        seller_account.tax = cd['tax']
+                        seller_account.national_card = cd['national_card']
                         seller_account.save()
 
                         return redirect('blog:list')
@@ -303,16 +275,11 @@ def create_company_seller(request):
         if request.method == "POST" :
             form = CreateCompanySeller(request.POST)
             if form.is_valid():
-                company_name = form.cleaned_data['company_name']
-                company_type = form.cleaned_data['company_type']
-                fixed_number = form.cleaned_data['fixed_number']
-                economic_code = form.cleaned_data['economic_code']
-                permission_to_sign = form.cleaned_data['permission_to_sign']
+                cd = form.cleaned_data
                 company_seller = CompanySeller.objects.create(
-                        company_name = company_name ,
-                        company_type = company_type , fixed_number = fixed_number ,
-                        economic_code = economic_code , permission_to_sign = permission_to_sign ,
-                        user = user)
+                    company_name = cd['company_name'] , permission_to_sign = cd['permission_to_sign'] ,
+                    company_type = cd['company_type'] , fixed_number = cd['fixed_number'] ,
+                    economic_code = cd['economic_code'] , user = user)
                 company_seller.save()
                 return redirect('account:create_seller')
         else:
@@ -331,17 +298,12 @@ def update_company_seller(request , id):
                 if request.method == 'POST' :
                     form = UpdateCompanySeller(request.POST)
                     if form.is_valid():
-                        company_name = form.cleaned_data['company_name']
-                        company_type = form.cleaned_data['company_type']
-                        fixed_number = form.cleaned_data['fixed_number']
-                        economic_code = form.cleaned_data['economic_code']
-                        permission_to_sign = form.cleaned_data['permission_to_sign']
-
-                        company_seller.company_name = company_name
-                        company_seller.company_type = company_type
-                        company_seller.fixed_number = fixed_number
-                        company_seller.economic_code = economic_code
-                        company_seller.permission_to_sign = permission_to_sign
+                        cd = form.cleaned_data
+                        company_seller.company_name = cd['company_name']
+                        company_seller.company_type = cd['company_type']
+                        company_seller.fixed_number = cd['fixed_number']
+                        company_seller.economic_code = cd['economic_code']
+                        company_seller.permission_to_sign = cd['permission_to_sign']
                         company_seller.save()
                         return redirect('blog:list')
                 else:

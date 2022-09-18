@@ -7,11 +7,8 @@ class CreateForm(forms.Form):
     titel = forms.CharField(max_length=100)
     body = MDTextFormField()
     image = forms.ImageField()
-    price = forms.IntegerField(min_value= 0)
     weigth = forms.IntegerField(min_value= 0)
     size = forms.IntegerField(min_value= 0)
-    discount = forms.IntegerField(min_value= 0 , max_value = 100)
-    number = forms.IntegerField(min_value= 0)
     garanty = MDTextFormField()
     tags = TagField()
 
@@ -27,9 +24,13 @@ class CreateForm(forms.Form):
         if len(body) < 10 :
             self._errors['body'] = self.error_class([
                 'body minimum 10 characters required'])
-        if len(garanty) < 10 :
+        if "<script>" in body :
+            self._errors['body'] = self.error_class([
+                'you cant script'])
+
+        if "<script>" in garanty :
             self._errors['garanty'] = self.error_class([
-                'garanty minimum 10 characters required'])
+                'you cant script'])
 
         return self.cleaned_data
 
@@ -37,9 +38,6 @@ class UpdateForm(forms.Form):
     titel = forms.CharField(max_length=100)
     body = MDTextFormField()
     image = forms.ImageField()
-    price = forms.IntegerField(min_value= 0)
-    discount = forms.IntegerField(min_value= 0 , max_value = 100)
-    number = forms.IntegerField(min_value= 0)
     garanty = MDTextFormField()
     tags = TagField()
 
@@ -49,15 +47,19 @@ class UpdateForm(forms.Form):
         body = self.cleaned_data.get('body')
         garanty = self.cleaned_data.get('garanty')
 
+
         if len(titel) < 3 :
             self._errors['titel'] = self.error_class([
                 'titel minimum 3 characters required'])
         if len(body) < 10 :
             self._errors['body'] = self.error_class([
                 'body minimum 10 characters required'])
-        if len(garanty) < 10 :
+        if "<script>" in body :
+            self._errors['body'] = self.error_class([
+                'you cant script'])
+        if "<script>" in garanty :
             self._errors['garanty'] = self.error_class([
-                'garanty minimum 10 characters required'])
+                'you cant script'])
 
         return self.cleaned_data
 
@@ -100,6 +102,7 @@ class AddressForm(forms.Form):
     floor = forms.CharField(max_length=2)
     plaque = forms.CharField(max_length=5)
     number = forms.CharField(max_length=11)
+    postal_code = forms.CharField(max_length=10)
 
     def clean(self):
 
@@ -107,11 +110,18 @@ class AddressForm(forms.Form):
         number = self.cleaned_data.get('number')
         plaque = self.cleaned_data.get('plaque')
         name = self.cleaned_data.get('name')
+        postal_code = self.cleaned_data.get('postal_code')
 
         if len(name) < 5 :
             self._errors['name'] = self.error_class([
                 'name minimum 5 characters required'])
-
+        if len(postal_code) < 10 :
+            self._errors['postal_code'] = self.error_class([
+                'postal_code minimum 10 characters required'])
+        if postal_code.isdigit() == False :
+            self._errors['postal_code'] = self.error_class([
+                'postal_code just number'])
+                
         if len(number) < 11 :
             self._errors['number'] = self.error_class([
                 'number minimum 11 characters required'])
@@ -140,6 +150,7 @@ class UpdateAddressForm(forms.Form):
     floor = forms.CharField(max_length=2)
     plaque = forms.CharField(max_length=5)
     number = forms.CharField(max_length=11)
+    postal_code = forms.CharField(max_length=10)
 
     def clean(self):
 
@@ -147,9 +158,15 @@ class UpdateAddressForm(forms.Form):
         number = self.cleaned_data.get('number')
         plaque = self.cleaned_data.get('plaque')
         name = self.cleaned_data.get('name')
+        postal_code = self.cleaned_data.get('postal_code')
 
 
-
+        if len(postal_code) < 10 :
+            self._errors['postal_code'] = self.error_class([
+                'postal_code minimum 10 characters required'])
+        if postal_code.isdigit() == False :
+            self._errors['postal_code'] = self.error_class([
+                'postal_code just number'])
         if len(number) < 11 :
             self._errors['number'] = self.error_class([
                 'number minimum 11 characters required'])
@@ -192,18 +209,22 @@ class Sellers(forms.Form):
     price = forms.IntegerField(min_value= 0)
     discount = forms.IntegerField(min_value= 0 , max_value = 100)
     number = forms.IntegerField(min_value= 0)
-    garanty = MDTextFormField()
 
 class ColorNumForm(forms.Form):
-    color = forms.CharField(max_length=100)
+    color = forms.CharField(max_length=100 , required=False)
     num = forms.IntegerField(min_value= 1)
-    size = forms.IntegerField(min_value= 1)
+    size = forms.IntegerField(min_value= 1 , required=False)
+    price = forms.IntegerField(min_value= 0)
+    def __init__(self, *args, **kwargs):
+        self.blog = kwargs.pop('blog', None)
+        super(ColorNumForm, self).__init__(*args, **kwargs)
 
     def clean(self):
  
         super(ColorNumForm, self).clean()
          
         color = self.cleaned_data.get('color')
+        size = self.cleaned_data.get('size')
 
         if len(color) < 2 :
             self._errors['color'] = self.error_class([
@@ -212,3 +233,25 @@ class ColorNumForm(forms.Form):
         if color.isalpha() == False :
             self._errors['color'] = self.error_class([
                 'color just charecter'])
+        is_color = True
+        try :
+            mycolor = Color.objects.get(color=color)
+        except :
+            is_color = False
+        if is_color == False :
+            self._errors['color'] = self.error_class([
+                'color is not true'])
+        if is_color and mycolor not in self.blog.color.all() :
+            self._errors['color'] = self.error_class([
+                'color not in blog color'])  
+        is_size = True
+        try :
+            mysize = size.objects.get(size=size)
+        except :
+            is_size = False
+        if is_size == False :
+            self._errors['size'] = self.error_class([
+                'size is not true'])
+        if is_size and mysize not in self.blog.size.all() :
+            self._errors['size'] = self.error_class([
+                'size not in blog size']) 

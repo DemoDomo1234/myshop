@@ -144,7 +144,7 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'demodomone@gmail.com'
 DEFAULT_FORM_EMAIL = 'demodomone@gmail.com'
-EMAIL_HOST_PASSWORD = 'demodomomyanime'
+EMAIL_HOST_PASSWORD = 'moxczeohuhgyowqm'
 
 
 
@@ -153,7 +153,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 if os.name == 'nt':
     VIRTUAL_ENV_BASE = os.environ['VIRTUAL_ENV']
     os.environ['PATH'] = os.path.join(VIRTUAL_ENV_BASE, r'.\Lib\site-packages\osgeo') + ';' + os.environ['PATH']

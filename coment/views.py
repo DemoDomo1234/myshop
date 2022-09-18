@@ -11,12 +11,9 @@ def update(request , id):
             if request.method == 'POST' :
                 form = UpdateComentsBlogForm(request.POST)
                 if form.is_valid():
-                    titel = form.cleaned_data['titel']
-                    body = form.cleaned_data['body']
-                    text.titel = titel
-                    text.body = body
-                    text.user = request.user
-                    text.date = text.date
+                    cd = form.cleaned_data
+                    text.titel = cd['titel']
+                    text.body = cd['body']
                     text.save()
                     return redirect('appblog:detail' , text.id)        
             else:
@@ -82,22 +79,14 @@ def blog_update(request , id):
             if request.method == 'POST' :
                 form = UpdateComentsForm(request.POST , request.FILES)
                 if form.is_valid():
-                    titel = form.cleaned_data['titel']
-                    body = form.cleaned_data['body']
-                    bad = form.cleaned_data['bad']
-                    good = form.cleaned_data['good']
-                    image = form.cleaned_data['image']
-                    sagestion = form.cleaned_data['sagestion']
-                    score = form.cleaned_data['score']
-                    text.titel = titel
-                    text.body = body
-                    text.bad = bad
-                    text.good = good
-                    text.image = image
-                    text.sagestion = sagestion
-                    text.score = score
-                    text.user = request.user
-                    text.date = text.date
+                    cd = form.cleaned_data
+                    text.titel = cd['titel']
+                    text.body = cd['body']
+                    text.bad = cd['bad']
+                    text.good = cd['good']
+                    text.image = cd['image']
+                    text.sagestion = cd['sagestion']
+                    text.score = cd['score']
                     text.save()
                     return redirect('blog:detail' , text.id)
             else:
@@ -175,7 +164,7 @@ def custion_update(request , id):
                     body = form.cleaned_data['body']
                     custion.body = body
                     custion.save()
-                    return redirect('blog:dteail' , custion.model.id)
+                    return redirect('blog:detail' , custion.model.id)
             else:
                 form = UpdateCustionForm()
         else:
@@ -222,11 +211,9 @@ def custion_unlikes(request , id):
     if user.is_authenticated :
         if user in custion.likes.all() :
             custion.likes.remove(user)
-
-        if user  in custion.likes.all() :
-            custion.likes.remove(user)
+        if user not in custion.unlikes.all() :
+            custion.unlikes.add(user)
             return redirect( 'blog:detail' , custion.model.id)
-
         else:
             custion.unlikes.remove(user)
             return redirect( 'blog:detail' , custion.model.id)
@@ -268,3 +255,24 @@ def create_custion(request , id):
     else:
         return redirect('account:login')
     return render(request , 'coments/create-custion2.html' , {'form':form})
+
+def create_one_custin(request , id):
+    user = request.user
+    blog = Blog.objects.get(id = id)
+    if user.is_authenticated :
+        if request.method == 'POST' :
+            form = CustionForm(request.POST)
+            if form.is_valid():
+                body = form.cleaned_data['custion_body']
+                new_custion = Custion.objects.create(body = body , user = user , model=blog)
+                new_custion.save()
+                return redirect('blog:detail' , blog.id)
+
+                
+        else:
+            form = CustionForm()
+
+    else:
+        return redirect('account:login')
+
+    return render(request , 'coments/create-one-custion.html' , {'form':form ,})

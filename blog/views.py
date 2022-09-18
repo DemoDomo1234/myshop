@@ -14,7 +14,6 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 import datetime
 from .func import timer
-# from django.contrib.gis.measure import Distance
 from django.contrib.gis.db.models.functions import Distance
 from .models import ColorNum
 import logging
@@ -23,6 +22,7 @@ from azbankgateways import bankfactories, models as bank_models, default_setting
 from azbankgateways.exceptions import AZBankGatewaysException
 from django.http import HttpResponse, Http404
 from taggit.models import Tag 
+from django.core.paginator import Paginator
 
 def home(request):
     blog = {}
@@ -30,12 +30,20 @@ def home(request):
     category_max = Category.objects.filter(blog_categorys__numes_myblog__num__gt = 1000)
     num_max = Blog.objects.filter(numes_myblog__num__gt = 1000 , published = True)
     brand_max = Brand.objects.filter(blog_brand__numes_myblog__num__gt = 1000)
-    myblog = Blog.objects.filter(discount__gt = 30 , published = True)
+    myblog = BlogSeller.objects.filter(discount__gt = 30 , published = True)
+    try :
+        request.session['search']
+    except :
+        request.session['search'] = ''
     if 'search' in request.GET :
-        search = request.GET['search']
+        request.session['search'] = request.GET['search']
+    if request.session['search'] :
         blog = Blog.objects.annotate(blogsearch=TrigramSimilarity(
-        'titel', search),).filter(
+        'titel', request.session['search']),).filter(
         blogsearch__gt=0.3 , published = True).order_by('-blogsearch')
+        page = Paginator(blog, 1)
+        lists = request.GET.get('page' , 1)
+        blog = page.get_page(lists)
     return render(request , 'blog/index.html' , {'blog':blog , 
     'myblog':myblog , 'num_max':num_max , 'brand_max':brand_max ,
     'category_max':category_max ,'advertising':advertising})
@@ -46,58 +54,33 @@ def detail(request , id):
     coments = Coments.objects.filter(blog = blog , published = True )
     custion = Custion.objects.filter(model = blog , published = True , one_respones = None , tow_respones = None)
     images = Images.objects.filter(blog = blog)
-    nums = Nums.objects.filter(blog = blog)
-    colors = ColorNum.objects.filter(blog = blog , published = True)
+    nums = Nums.objects.get(blog = blog)
     category = blog.category.all()
-    sellers = BlogSeller.objects.filter(blog=blog , published = True)
     tags = blog.tags.all()
     tag = blog.tags.values_list('id' , flat = True)
     blogs = Blog.objects.filter(tags__in = tag , published = True).exclude(id = blog.id)
     myblogs = blogs.annotate(tags_count = Count('tags')).order_by('-tags_count')
     if user.is_authenticated :
-        lists = List.objects.filter(user=user)
-        order = Order.objects.get(user = user , current=True)
-        item = OrderItem.objects.filter(order = order)
+        lists = List.objects.filter(user=user).exclude(list = blog)
         if request.method == 'POST' :
-            form1 = ComentsForm(request.POST , request.FILES)
-            form2 = CustionForm(request.POST)
-            if form1.is_valid():
-                titel = form1.cleaned_data['titel']
-                body = form1.cleaned_data['body']
-                bad = form1.cleaned_data['bad']
-                good = form1.cleaned_data['good']
-                image = form1.cleaned_data['image']
-                sagestion = form1.cleaned_data['sagestion']
-                score = form1.cleaned_data['score']
-
-                text = Coments.objects.create(body = body , user = user ,
-                        blog = blog , image = image , titel=titel , bad=bad ,
-                        good=good , sagestion=sagestion , score=score )
+            form = ComentsForm(request.POST , request.FILES)
+            if form.is_valid():
+                cd = form.cleaned_data
+                text = Coments.objects.create(body=cd['body'], user=user,
+                        blog=blog, image=cd['image'], titel=cd['titel'], bad=cd['bad'],
+                        good=cd['good'], sagestion=cd['sagestion'], score=cd['score'])
                 text.save()
-                return redirect('blog:detail' , blog.id)
-
-            if form2.is_valid():
-                body = form2.cleaned_data['custion_body']
-                new_custion = Custion.objects.create(body = body , user = user , model=blog)
-                new_custion.save()
-                return redirect('blog:detail' , blog.id)
-
-                
+                return redirect('blog:detail' , blog.id)        
         else:
-            form1 = ComentsForm()
-            form2 = CustionForm()
-
+            form = ComentsForm()
     else:
         return redirect('account:login')
-
-    return render(request , 'blog/detail.html' , {'blog':blog , 'form1':form1 , 'form2':form2 ,
-    'coments':coments , 'lists':lists , 'colors':colors , 'images':images  ,
-    'category':category , 'sellers':sellers , 'myblogs':myblogs , 'items':item ,
-    'custion':custion , 'tags':tags , 'nums':nums})
+    return render(request , 'blog/detail.html' , {'blog':blog , 'form':form , 
+    'coments':coments , 'lists':lists , 'images':images ,'category':category ,
+    'myblogs':myblogs ,'custion':custion , 'tags':tags , 'nums':nums})
 
 def create(request):
     user = request.user
-    addresses = Address.objects.filter(user = user)
     brands = Brand.objects.all()
     category = Category.objects.all()
     sizes = Sizes.objects.all()
@@ -113,54 +96,34 @@ def create(request):
             if request.method == "POST" :
                 form = CreateForm(request.POST , request.FILES)
                 if form.is_valid():
-
-                    titel = form.cleaned_data['titel']
-                    body = form.cleaned_data['body']
-                    image = form.cleaned_data['image']
-                    price = form.cleaned_data['price']
-                    discount = form.cleaned_data['discount']
-                    number = form.cleaned_data['number']
-                    garanty = form.cleaned_data['garanty']
+                    cd = form.cleaned_data
                     brand_name = request.POST['brand']
-                    tags = form.cleaned_data['tags']
-                    size = form.cleaned_data['size']
-                    weigth = form.cleaned_data['weigth']
-                    address_name = request.POST['address']
-
                     brand = Brand.objects.get(brand = brand_name)
-                    address = Address.objects.get(name = address_name)
-
                     blog = Blog.objects.create(
-                            titel = titel , body = body ,
-                            image = image , number = number ,
-                            price = price , seller = user ,
-                            discount = discount , garanty = garanty ,
-                            brand = brand , tags = tags , size=size ,
-                            weigth=weigth , address = address)
-                    
+                            titel = cd['titel'] , body = cd['body'] ,
+                            image = cd['image'] , seller = user ,
+                            brand = brand , size=cd['size'] ,
+                            weigth=cd['weigth'] , garanty = cd['garanty'])
+                    for tag in cd['tags'] :
+                            blog.tags.add(tag)
                     for cate in request.POST.getlist('category'):
                         category = Category.objects.get(titel = cate)
                         if category not in blog.category.all():
-
                             blog.category.add(category)
-
-                    for mycolor in request.POST.getlist('color'):
-                        color = Colors.objects.get(color = mycolor)
-                        if color not in blog.color.all():
-
-                            blog.color.add(color)
-
-                    for mysize in request.POST.getlist('size'):
-                        size = Sizes.objects.get(size = mysize)
-                        if size not in blog.size.all():
-
-                            blog.size.add(size)
-
+                    try :
+                        for mycolor in request.POST.getlist('color'):
+                            color = Colors.objects.get(color = mycolor)
+                            if color not in blog.color.all():
+                                blog.color.add(color)
+                    except :
+                        for mysize in request.POST.getlist('size'):
+                            size = Sizes.objects.get(size = mysize)
+                            if size not in blog.sizes.all():
+                                blog.sizes.add(size)
                     blog.save()
                     nums = Nums.objects.create(blog=blog , num = 0)
                     nums.save()
                     return redirect('blog:detail' , blog.id)
-                    
             else:
                 form = CreateForm()
         else:
@@ -168,7 +131,7 @@ def create(request):
     else:
         return redirect('account:login')
 
-    return render(request , 'blog/create.html' , {'form':form , 'addresses':addresses , 
+    return render(request , 'blog/create.html' , {'form':form ,  
     'brands':brands , 'category':category , 'sizes':sizes , 'colors':colors})    
 
 def update(request , id):
@@ -180,13 +143,13 @@ def update(request , id):
     mycolor = blog.color.all()
     id1 = mycolor.values_list('id' , flat=True)
     colors = Colors.objects.filter(id__gte = 0).exclude(id__in = id1)
-    mysize = blog.size.all()
+    mysize = blog.sizes.all()
     id1 = mysize.values_list('id' , flat=True)
     sizes = Sizes.objects.filter(id__gte = 0).exclude(id__in = id1)
 
     if 'search' in request.GET :
         search = request.GET['search']
-        categorys = categorys.annotate(categorysearch=TrigramSimilarity(
+        category = categorys.annotate(categorysearch=TrigramSimilarity(
         'titel', search),).filter(
         categorysearch__gt=0.3).order_by('-categorysearch')
     user = request.user
@@ -196,27 +159,18 @@ def update(request , id):
                 if request.method == 'POST' :
                     form = UpdateForm(request.POST , request.FILES)
                     if form.is_valid():
-                        titel = form.cleaned_data['titel']
-                        body = form.cleaned_data['body']
-                        image = form.cleaned_data['image']
-                        price = form.cleaned_data['price']
-                        discount = form.cleaned_data['discount']
-                        number = form.cleaned_data['number']
-                        garanty = form.cleaned_data['garanty']
+                        cd = form.cleaned_data
                         mybrand = request.POST['brand']
-                        tags = form.cleaned_data['tags']
-                        brand = Brand.objects.get(brand = mybrand)
-                        blog.titel = titel
-                        blog.body = body
-                        blog.image = image
-                        blog.price = price
+                        blog.titel = cd['titel']
+                        blog.body = cd['body']
+                        blog.image = cd['image']
+                        blog.garanty = cd['garanty']
+
                         blog.seller = user
                         blog.time = blog.time
-                        blog.discount = discount
-                        blog.number = number
-                        blog.granty = garanty
-                        blog.brand = brand
-                        blog.tags = tags
+                        blog.brand = Brand.objects.get(brand = mybrand)
+                        for tag in cd['tags'] :
+                            blog.tags.add(tag)
 
                         for cate in request.POST.getlist('category'):
                             category = Category.objects.get(titel = cate)
@@ -227,33 +181,33 @@ def update(request , id):
                             category = Category.objects.get(titel= cate)
                             if category in blog.category.all():
                                 blog.category.remove(category)
+                    try:
+                        for mycolor in request.POST.getlist('color'):
+                            color = Colors.objects.get(color = mycolor)
+                            if color not in blog.color.all():
 
-                    for mycolor in request.POST.getlist('color'):
-                        color = Colors.objects.get(color = mycolor)
-                        if color not in blog.color.all():
+                                blog.color.add(color)
+                    except :
+                        for mysize in request.POST.getlist('size'):
+                            size = Sizes.objects.get(size = mysize)
+                            if size not in blog.size.all():
 
-                            blog.color.add(color)
+                                blog.size.add(size)
+                    try :
+                        for mycolor in request.POST.getlist('colors'):
+                            color = Colors.objects.get(color = mycolor)
+                            if color in blog.color.all():
 
-                    for mysize in request.POST.getlist('size'):
-                        size = Sizes.objects.get(size = mysize)
-                        if size not in blog.size.all():
+                                blog.color.remove(color)
+                    except :
+                        for mysize in request.POST.getlist('sizes'):
+                            size = Sizes.objects.get(size = mysize)
+                            if size in blog.size.all():
 
-                            blog.size.add(size)
+                                blog.size.remove(size)
 
-                    for mycolor in request.POST.getlist('colors'):
-                        color = Colors.objects.get(color = mycolor)
-                        if color in blog.color.all():
-
-                            blog.color.remove(color)
-
-                    for mysize in request.POST.getlist('sizes'):
-                        size = Sizes.objects.get(size = mysize)
-                        if size in blog.size.all():
-
-                            blog.size.remove(size)
-
-                        blog.save()
-                        return redirect('blog:list')
+                    blog.save()
+                    return redirect('blog:detail' , blog.id)
                 else:
                     form = UpdateForm()
             else:
@@ -290,14 +244,7 @@ def like(request , id):
         if user not in blog.like.all() :
             blog.like.add(user)
             return redirect( 'blog:detail' , id)
-    else:
-        return redirect('account:login')
-
-def unlike(request , id):
-    blog = Blog.objects.get(id = id)
-    user = request.user
-    if user.is_authenticated :
-        if user  in blog.like.all() :
+        else:
             blog.like.remove(user)
             return redirect( 'blog:detail' , id)
     else:
@@ -317,85 +264,27 @@ def order(request):
         address = Address.objects.get(name = address_name , user = user)
         order.address = address
         order.time = time
-        if payment == 'online' :
-            order.online = True
-        for i in request.POST.getlist('num'):
-            blog = Blog.objects.get(id = item[a].blog.id)
-            if item[a].seller == blog.seller :
-                num = Nums.objects.get(blog=item[a].blog)
-                try :
-                    color = ColorNum.objects.get(blog=item[a].blog , color = item[a].color , seller = item[a].seller)
-                except :
-                    color = ColorNum.objects.get(blog=item[a].blog , size = item[a].size , seller = item[a].seller)
+        if payment == 'cash' :
+            order.online = False
+        for item in item:
+            blog = BlogSeller.objects.get(blog = item[a].blog , seller__id = item[a].seller.id)
+            try :
+                color = ColorNum.objects.get(blog=item[a].seller.blog , color = item[a].color , seller = item[a].seller)
+            except :
+                color = ColorNum.objects.get(blog=item[a].seller.blog , size = item[a].size , seller = item[a].seller)
 
-                if int(i) > item[a].num :
-                    nums = int(i) - item[a].num
-                    blog.number += nums
-                    num.num += nums
-                    item[a].num += nums
-                    color.num += nums
-                    color.nums -= nums
-                else:
-                    nums = item[a].num - int(i)
-                    blog.number -= nums
-                    num.num -= nums
-                    item[a].num -= nums
-                    color.num -= nums
-                    color.nums += nums
-                blog.save()
-                num.save()
-                color.save()
-                item[a].save()
-                send = (blog.size * 10 ) + (blog.weigth * 5 ) * int(i)
-                map = Distance(blog.address.location , order.address.location)
-                send += map
-                send *= 5000
-                if user.is_special :
-                    send = 0
-                price += (blog.price - blog.discount) * int(i)
-                price += send
-                order.price = price
-                order.ordered = True 
-                order.current = False
-                order.save()
-                print(price)
-            else:
-                blog = BlogSeller.objects.get(blog = item[a].blog , seller = item[a].seller)
-                try :
-                    color = ColorNum.objects.get(blog=item[a].item_seller.blogseller.blog , color = item[a].color , seller = item[a].seller)
-                except :
-                    color = ColorNum.objects.get(blog=item[a].item_seller.blogseller.blog , size = item[a].size , seller = item[a].seller)
-
-                if int(i) > item[a].num :
-                    nums = int(i) - item[a].num
-                    blog.number += nums
-                    blog.num += nums
-                    item[a].num += nums
-                    color.num += nums
-                    color.nums -= nums
-                else:
-                    nums = item[a].num - int(i)
-                    blog.number -= nums
-                    blog.num -= nums
-                    item[a].num -= nums
-                    color.num -= nums
-                    color.nums += nums
-
-                blog.save()
-                color.save()
-                item.save()
-                send = (blog.size * 10 ) + (blog.weigth * 5 ) * int(i)
-                map = Distance(blog.address.location , order.address.location)
-                send += map
-                send *= 5000
-                if user.is_special :
-                    send = 0
-                price += (blog.price - blog.discount) * int(i)
-                price += send
-                order.price = price
-                order.ordered = True
-                order.current = False
-                order.save()
+            send = (blog.blog.size * 10 ) + (blog.blog.weigth * 5 ) * int(i)
+            map = Distance(blog.address.location , order.address.location)
+            send += map
+            send *= 5000
+            if user.is_special :
+                send = 0
+            price += (blog.price - blog.discount + color.price) * int(i)
+            price += send
+            order.price = price
+            order.ordered = True
+            order.current = False
+            order.save()
             a += 1
         if order.online == True :
             return redirect('blog:go_to_gateway')
@@ -408,53 +297,41 @@ def shop(request , id):
     blog = Blog.objects.get(id = id)
     user = request.user
     if user.is_authenticated :
-        if blog.number > 0 :
-            if request.method == 'POST' :
-                order = Order.objects.get(user = user , current=True)
-                try:
-                    color = request.POST['color']
-                except:
-                    size = request.POST['size']
-                    seller = request.POST['seller']
-                    num = request.POST['num']
-                    nums = Nums.objects.get(blog=blog)
-                    nums.num = num
-                    nums.save()
-                    myseller = User.objects.get(username = seller)
-                    mysize = Sizes.objects.get(size = size)
-                    item = OrderItem.objects.create(blog=blog , num=num , order=order ,
-                    size=mysize , seller=myseller)
-                    item.save()
-                    color = ColorNum.objects.get(blog=blog , size=mysize , seller = myseller)
-                    color.num -= int(num)
-                    color.nums += int(num)
-                    color.save()
-                try:
-                    size = request.POST['size']
-                except:
-                        color = request.POST['color']
-                        mycolor = Colors.objects.get(color = color)
-                        seller = request.POST['seller']
-                        num = request.POST['num']
-                        nums = Nums.objects.get(blog=blog)
-                        nums.num = num
-                        nums.save()
-                        myseller = User.objects.get(username = seller)
-                        item = OrderItem.objects.create(blog=blog , num=num , order=order ,
-                        color=mycolor , seller=myseller)
-                        item.save()
-                        color = ColorNum.objects.get(blog=blog , color=mycolor)
-                        color.num -= int(num)
-                        color.nums += int(num)
-                        color.save()
-                if myseller != blog.seller :
-                    seler = BlogSeller.objects.get(seller = myseller)
-                    seler.number -= int(num)
-                    seler.save()
-                else:
-                    blog.number -= int(num)
-                    blog.save()      
-                return redirect('blog:detail' , id)
+        if request.method == 'POST' :
+            order = Order.objects.get(user = user , current=True)
+            num = request.POST['num']
+            seller = request.POST['seller']
+            try:
+                size = request.POST['size']
+                nums = Nums.objects.get(blog=blog)
+                nums.num += int(num)
+                nums.save()
+                myseller = BlogSeller.objects.get(id = seller)
+                mysize = Sizes.objects.get(size = size)
+                item = OrderItem.objects.create(blog=blog , num=num , order=order ,
+                size=mysize , seller=myseller ,user=user)
+                item.save()
+                color = ColorNum.objects.get(blog=blog , size=mysize , seller = myseller)
+                color.num -= int(num)
+                color.nums += int(num)
+                color.save()
+            except:
+                color = request.POST['color']
+                mycolor = Colors.objects.get(color = color)
+                nums = Nums.objects.get(blog=blog)
+                nums.num += int(num)
+                nums.save()
+                myseller = BlogSeller.objects.get(id = seller)
+                item = OrderItem.objects.create(blog=blog , num=num , order=order ,
+                color=mycolor , seller=myseller)
+                item.save()
+                color = ColorNum.objects.get(blog=blog , color=mycolor)
+                color.num -= int(num)
+                color.nums += int(num)
+                color.save()
+                myseller.number -= int(num)
+                myseller.save() 
+            return redirect('blog:detail' , id)
         else:
             return redirect('blog:list')
     else:
@@ -470,21 +347,19 @@ def unshop(request , id):
     nums = Nums.objects.get(blog=blog)
     user = request.user
     if user.is_authenticated :
-        if user != blog.seller :
+        if user == item.user :
             seler = BlogSeller.objects.get(seller = user)
-            seler.number += int(num)
+            seler.number += item.num
             seler.save()
-        else:
-            blog.number += item.num 
-        blog.number += item.num 
-        color.num += item.num
-        color.nums -= item.num
-        color.save()
-        blog.save()
-        nums.num -= item.num 
-        nums.save()
-        item.delete()
-        return redirect('blog:detail' , blog.id)
+            color.num += item.num
+            color.nums -= item.num
+            color.save()
+            nums.num -= item.num 
+            nums.save()
+            item.delete()
+            return redirect('blog:detail' , blog.id)
+        else :
+            return redirect('blog:list')
     else:
         return redirect('account:login')
 
@@ -492,17 +367,14 @@ def send_email(request):
     if request.method == "POST" :
         form = SendEmail(request.POST)
         if form.is_valid():
-            name = form.cleaned_data['name']
-            massage = form.cleaned_data['massage']
-            subject = form.cleaned_data['subject']
-            email = form.cleaned_data['email'] 
+            cd = form.cleaned_data
             massages = '''
                         name : {0}
                         subject : {1}
                         message : {2}
-                       '''.format(name , subject , massage)
-            send_mail('message' , massages , 'demodomone@gmail.com' , [email] ,
-            fail_silently=False , auth_password='g b r m d o g r x l s p u d j t')  
+                       '''.format(cd['name'] , cd['massage'] , cd['subject'])
+            send_mail('message' , massages , 'demodomone@gmail.com' , [cd['email']] ,
+            fail_silently=False , auth_password='moxczeohuhgyowqm')  
             return redirect('blog:list')
     form = SendEmail()
     return render(request , 'blog/sendmail.html' , {'form':form})
@@ -513,10 +385,9 @@ def create_list(request):
         if request.method == 'POST':
             form = ListForm(request.POST)
             if form.is_valid():
-                titel = form.cleaned_data['titel']
-                body = form.cleaned_data['body']
-                lists = List.objects.create(titel=titel ,
-                user=user , body = body)
+                cd = form.cleaned_data
+                lists = List.objects.create(titel=cd['titel'] ,
+                user=user , body = cd['body'])
                 lists.save()
                 return redirect('blog:list')
         else:
@@ -534,10 +405,9 @@ def update_list(request , id):
             if request.method == 'POST':
                 form = ListForm(request.POST)
                 if form.is_valid():
-                    titel = form.cleaned_data['titel']
-                    body = form.cleaned_data['body']
-                    lists.titel = titel
-                    lists.body = body
+                    cd = form.cleaned_data
+                    lists.titel = cd['titel']
+                    lists.body = cd['body']
                     lists.save()
                     return redirect('blog:list')
 
@@ -551,8 +421,15 @@ def update_list(request , id):
 
 def detail_list(request , id):
     lists = List.objects.get(id = id)
-    blog = Blog.objects.filter(lists=lists)
-    return render(request, 'blog/detaillist.html' , {'blog':blog})
+    user = request.user
+    if user.is_authenticated :  
+        if user == lists.user :
+            blog = Blog.objects.filter(lists=lists)
+            return render(request, 'blog/detaillist.html' , {'blog':blog , 'lists':lists})
+        else :
+            return redirect('blog:list')
+    else :
+        return redirect('blog:list')
 
 def delete_list(request , id):
     lists = List.objects.get(id = id)
@@ -570,7 +447,6 @@ def delete_list(request , id):
 
 def list_view(request , id):
     user = request.user
-    listes = List.objects.filter(user = user)
     if user.is_authenticated :  
         if request.method == 'POST':
             titel = request.POST.getlist('titel')
@@ -583,13 +459,11 @@ def list_view(request , id):
                     return redirect('blog:detail' , id)
     else:
         return redirect('account:login')
-    return render(request, 'blog/list.html' , {'listes':listes})
 
 def unlist_view(request , id):
     blog = Blog.objects.get(id = id)
     user=request.user
     if user.is_authenticated :  
-        listes = blog.lists.filter(user=request.user)
         if request.method == 'POST':
             titel = request.POST.getlist('titel')
             for i in titel :
@@ -599,7 +473,6 @@ def unlist_view(request , id):
                     return redirect('blog:detail' , id)
     else:
         return redirect('account:login')
-    return render(request, 'blog/unlist.html' , { 'listes':listes})
 
 def notifications(request , id):
     blog = Blog.objects.get(id = id)
@@ -608,17 +481,10 @@ def notifications(request , id):
         if user not in blog.notifications.all() :
             blog.notifications.add(user)
             return redirect( 'blog:detail' , id)
-    return redirect('account:login')
-
-def un_notifications(request , id):
-    blog = Blog.objects.get(id = id)
-    user = request.user
-    if user.is_authenticated :
-        if user  in blog.notifications.all() :
+        else:
             blog.notifications.remove(user)
             return redirect( 'blog:detail' , id)
-    else:
-        return redirect('account:login')
+    return redirect('account:login')
 
 def share_post(request , id):
     blog = Blog.objects.get(id = id)
@@ -628,7 +494,7 @@ def share_post(request , id):
             url = request.build_absolute_uri(blog.get_absolute_url())
             email = form.cleaned_data['email'] 
             send_mail(blog.titel , url , 'demodomone@gmail.com' , [email] ,
-            fail_silently=False , auth_password='g b r m d o g r x l s p u d j t')  
+            fail_silently=False , auth_password='moxczeohuhgyowqm')  
             return redirect('blog:detail' , id)
     form = Share()
     return render(request , 'blog/share.html' , {'form':form})
@@ -642,13 +508,10 @@ def add_address(request):
             location=Point(long,lat,srid=4326)
             form = AddressForm(request.POST)
             if form.is_valid():
-                floor = form.cleaned_data['floor']
-                plaque = form.cleaned_data['plaque']
-                name = form.cleaned_data['name']
-                number = form.cleaned_data['number']
+                cd = form.cleaned_data
                 address = Address.objects.create(user=user , 
-                location=location , floor=floor , plaque=plaque , name=name ,
-                number=number)
+                location=location , floor=cd['floor'] , plaque=cd['plaque'] , name=cd['name'] ,
+                number=cd['number'] , postal_code=cd['postal_code'])
                 address.save()
                 return redirect('account:detail' , user.id)
         else:
@@ -667,12 +530,16 @@ def update_address(request , id):
                 long=float(request.POST['longitude'])
                 form = UpdateAddressForm(request.POST)
                 if form.is_valid():
-                    address.floor = form.cleaned_data['floor']
-                    address.plaque = form.cleaned_data['plaque']
-                    address.name = form.cleaned_data['name']
-                    address.number = form.cleaned_data['number']
+                    cd = form.cleaned_data
+                    address.floor = cd['floor']
+                    address.plaque = cd['plaque']
+                    address.name = cd['name']
+                    address.number = cd['number']
+                    address.postal_code = cd['postal_code']
                     address.location=Point(long,lat,srid=4326) 
                     address.save()
+                    return redirect('blog:list')
+
             else:
                 form = UpdateAddressForm()
         else:
@@ -724,7 +591,7 @@ def update_image(request , id):
     user = request.user
     if user.is_authenticated :
         if user.is_seller == True :
-            if user == images.blog.seller or user == images.myblog.author :
+            if user == images.blog.seller :
                 if request.method == 'POST' :
                     form = ImageForm(request.POST ,  request.FILES)
                     if form.is_valid():
@@ -747,7 +614,7 @@ def delete_image(request , id):
     user = request.user
     if user.is_authenticated :
         if user.is_seller == True :
-            if user == images.blog.seller or user == images.myblog.author :
+            if user == images.blog.seller :
                 if request.method == 'POST' :   
                     images.image.delete()
                     images.delete()
@@ -823,15 +690,11 @@ def sellers(request , id):
         if request.method == 'POST' :
             form = Sellers(request.POST)
             if form.is_valid():
-                price = form.cleaned_data['price']
-                discount = form.cleaned_data['discount']
-                number = form.cleaned_data['number']
-                garanty = form.cleaned_data['garanty']
+                cd = form.cleaned_data
                 myaddress = request.POST['address']
                 address = Address.objects.get(user=user , name = myaddress)
                 seller = BlogSeller.objects.create(blog = blog , seller = user , address = address , 
-                number = number , price = price , discount = discount , 
-                garanty = garanty)
+                number = cd['number'] , price = cd['price'] , discount = cd['discount'])
                 seller.save()
                 return redirect('blog:detail' , id)
         else:
@@ -846,23 +709,22 @@ def sellers_update(request , id):
     user = request.user
     addresses = Address.objects.filter(user = user)
     if user.is_authenticated :
-        if request.method == 'POST' :
-            form = Sellers(request.POST)
-            if form.is_valid():
-                price = form.cleaned_data['price']
-                discount = form.cleaned_data['discount']
-                number = form.cleaned_data['number']
-                myaddress = request.POST['address']
-                garanty = form.cleaned_data['garanty']
-                address = Address.objects.get(user=user , name = myaddress)
-                seller.price = price
-                seller.number = number
-                seller.discount = discount
-                seller.garanty = garanty
-                seller.save()
-                return redirect('blog:detail' , id)
-        else:
-            form = Sellers()
+        if user == seller.seller :
+            if request.method == 'POST' :
+                form = Sellers(request.POST)
+                if form.is_valid():
+                    cd = form.cleaned_data
+                    myaddress = request.POST['address']
+                    address = Address.objects.get(user=user , name = myaddress)
+                    seller.price = cd['price']
+                    seller.number = cd['number']
+                    seller.discount = cd['discount']
+                    seller.save()
+                    return redirect('blog:detail' , seller.blogid)
+            else:
+                form = Sellers()
+        else :
+            return redirect('blog:list')
     else:
         return redirect('account:login')
 
@@ -872,34 +734,31 @@ def color_num(request , id):
     blog = Blog.objects.get(id = id)
     user = request.user
     if user.is_authenticated :
-        if blog.number > 0 :
-            if request.method == 'POST' :
-                form = ColorNumForm(request.POST)
-                if form.is_valid():
-                    num = form.cleaned_data['num']
+        if request.method == 'POST' :
+            form = ColorNumForm(request.POST , blog=blog)
+            seller = BlogSeller.objects.get(blog=blog , seller = user)
+            if form.is_valid():
+                num = form.cleaned_data['num']
+                price = form.cleaned_data['price']
+                try :
                     color = form.cleaned_data['color']
-                    size = form.cleaned_data['size']
-
-                    color = Colors.objects.get_or_create(color = color)
-                    size = Sizes.objects.get_or_create(size = size)
-                    color = form.cleaned_data['color']
-                    size = form.cleaned_data['size']
                     color = Colors.objects.get(color = color)
+                    colors = ColorNum.objects.create(blog = blog , seller = seller , num = num ,
+                    color = color , price=price)
+                except :
+                    size = form.cleaned_data['size']
                     size = Sizes.objects.get(size = size)
-
-
                     colors = ColorNum.objects.create(blog = blog , seller = user , num = num ,
-                    color = color , size = size)
-                    seller = BlogSeller.objects.get(blog=blog , seller = user)
-                    mycolor = ColorNum.objects/filter(seller = user , blog=blog).aggregate(Sum('num'))
-                    mynum = mycolor + num
-                    if mynum <= seller.number :
-                        colors.save()
-                        return redirect('blog:detail' , id)
-            else:
-                form = ColorNumForm()
-        else:   
-            return redirect('blog:list')
+                    size = size , price=price)
+                mycolor = ColorNum.objects.filter(seller = seller , blog=blog).aggregate(Sum('num'))
+                if mycolor['num__sum'] == None :
+                    mycolor['num__sum'] = 0
+                mynum = mycolor['num__sum'] + int(num)
+                if mynum <= seller.number :
+                    colors.save()
+                    return redirect('blog:detail' , id)
+        else:
+            form = ColorNumForm(blog=blog)
     else:
         return redirect('account:login')
 
@@ -909,25 +768,37 @@ def color_num_update(request , id):
     colors = ColorNum.objects.get(id = id)
     user = request.user
     if user.is_authenticated :
-        if request.method == 'POST' :
-            form = ColorNumForm(request.POST)
-            if form.is_valid():
-                num = form.cleaned_data['num']
-                mycolor = form.cleaned_data['color']
-                mysize = form.cleaned_data['size']
-                color = Colors.objects.get_or_create(color = mycolor)
-                size = Sizes.objects.get_or_create(size = mysize)
-                colors.num = num 
-                colors.color = color
-                colors.size = size
-                seller = BlogSeller.objects.get(blog=blog , seller = user)
-                mycolor = ColorNum.objects/filter(seller = user , blog=blog).aggregate(Sum('num'))
-                mynum = mycolor + num - colors.num
-                if mynum <= seller.number :
-                    colors.save()
-                    return redirect('blog:detail' , id)
-        else:
-            form = ColorNumForm()
+        seller = BlogSeller.objects.get(blog=colors.blog , seller = user)
+        if seller == colors.seller :
+            if request.method == 'POST' :
+                form = ColorNumForm(request.POST , blog=colors.blog)
+                if form.is_valid():
+                    num = form.cleaned_data['num']
+                    price = form.cleaned_data['price']
+                    try :
+                        color = form.cleaned_data['color']
+                        color = Colors.objects.get(color = color)
+                        colors.color = color
+                        colors.size = None
+                    except :
+                        size = form.cleaned_data['size']
+                        size = Sizes.objects.get(size = size)
+                        colors.size = size
+                        colors.color = None
+                    colors.num = num 
+                    colors.price = price
+                    mycolor = ColorNum.objects.filter(seller = seller , blog=colors.blog).aggregate(Sum('num'))
+                    if mycolor['num__sum'] == None :
+                        mycolor['num__sum'] = 0
+                    mynum = mycolor['num__sum'] + int(num) - colors.num
+                    if mynum <= seller.number :
+                        colors.save()
+                    return redirect('blog:detail' , colors.blog.id)
+            else:
+                form = ColorNumForm(blog=colors.blog)
+        else :
+            return redirect('blog:list')
+
     else:
         return redirect('account:login')
 
@@ -996,8 +867,11 @@ def sellers_delete(request , id):
     seller = BlogSeller.objects.get(id = id)
     user = request.user
     if user.is_authenticated :
-        if request.method == 'POST' :
-            seller.delete()
+        if user == seller.seller :
+            if request.method == 'POST' :
+                seller.delete()
+                return redirect('blog:list')
+        else :
             return redirect('blog:list')
     else:
         return redirect('account:login')
@@ -1008,8 +882,12 @@ def color_num_delete(request , id):
     colors = ColorNum.objects.get(id = id)
     user = request.user
     if user.is_authenticated :
-        if request.method == 'POST' :    
-            colors.delete()
+        seller = BlogSeller.objects.get(blog=colors.blog , seller = user)
+        if seller == colors.seller :
+            if request.method == 'POST' :    
+                colors.delete()
+                return redirect('blog:detail' , colors.blog.id)
+        else :
             return redirect('blog:list')
     else:
         return redirect('account:login')
@@ -1020,3 +898,56 @@ def brand_list(request , id):
     brand = Brand.objects.get(id = id)
     blog = Blog.objects.filter(brand = brand , published = True)
     return render(request , 'blog/brand-list.html' , {'blog':blog})
+
+def item_update(request , id):
+    item = OrderItem.objects.get(id = id)
+    blog = BlogSeller.objects.get(blog = item.blog , seller__id = item.seller.id)
+    try :
+        color = ColorNum.objects.get(blog=item.seller.blog , color = item.color , seller = item.seller)
+    except :
+        color = ColorNum.objects.get(blog=item.seller.blog , size = item.size , seller = item.seller)
+    if request.method == 'POST' :
+        if request.user.is_authenticated :
+            if request.user == item.user : 
+                num = request.POST['num']
+                if int(num) > item.num :
+                    nums = int(num) - item.num
+                    blog.number += nums
+                    item.num += nums
+                    color.num += nums
+                    color.nums -= nums
+                else:
+                    nums = item.num - int(num)
+                    blog.number -= nums
+                    item.num -= nums
+                    color.num -= nums
+                    color.nums += nums
+                blog.save()
+                color.save()
+                item.save()
+            else:
+                return redirect('blog:list')
+        else:
+            return redirect('account:login')
+    else:
+        return render(request , 'blog/update-item.html' , {'item':item})
+
+def select_seller(request):
+    if request.method == 'POST':
+        id = request.POST['id']
+        blog = Blog.objects.get(id=id)
+        try:
+            mycolor = request.POST['color']
+            color = Colors.objects.get(color=mycolor)
+            colors = ColorNum.objects.filter(blog = blog , published = True , color=color)
+        except:
+            mysize = request.POST['size']
+            size = Sizes.objects.get(size=mysize)
+            colors = ColorNum.objects.filter(blog = blog , published = True , siez=size)
+    return render(request , 'blog/seller-select.html' , {'colors':colors})
+
+def inter_num(request):
+    if request.method == 'POST' :
+        id = request.POST['id']
+        color = ColorNum.objects.get(id=id)
+    return render(request , 'blog/inter-num.html' , {'color':color})

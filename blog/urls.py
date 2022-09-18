@@ -10,7 +10,6 @@ urlpatterns = [
     path('delete/<id>' , delete , name = 'delete'),
     path('detail/<id>' , detail , name = 'detail'),
     path('like/<id>' , like , name = 'like'),
-    path('unlike/<id>' , unlike , name = 'unlike'),
     path('shop/<id>' , shop , name = 'shop'),
     path('unshop/<id>' , unshop , name = 'unshop'),
     path('order' , order , name = 'order'),
@@ -19,7 +18,6 @@ urlpatterns = [
     path('update-list/<id>' , update_list , name = 'update_list'), 
     path('delete-list/<id>' , delete_list , name = 'delete_list'),
     path('notifications/<id>' , notifications , name = 'notifications'),
-    path('un-notifications/<id>' , un_notifications , name = 'un_notifications'),
     path('list/<id>' , list_view , name = 'lists'),
     path('unlist/<id>' , unlist_view , name = 'unlist'),
     path('list-detail/<id>' , detail_list , name = 'detail_list'),
@@ -44,5 +42,10 @@ urlpatterns = [
     path('color-num-delete/<id>' , color_num_delete , name='color_num_delete'),
     path('go-to-gateway' , go_to_gateway_view , name = 'go_to_gateway'),
     path('callback-gateway' , callback_gateway_view , name = 'callback_gateway'),
+    path('item-update/<id>' , item_update , name = 'item_update'),
+    path('select-seller' , select_seller , name = 'select'),
+    path('inter-num' , inter_num , name = 'inter'),
+
+
 
 ]

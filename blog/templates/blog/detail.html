@@ -2,7 +2,6 @@
 {% load social_share %}
 {% load crispy_forms_tags %}
 {% load blog_tags %}
-{% load myblog_tags %}
 {% load coment_tags %}
 
 {% block content %}
@@ -28,7 +27,8 @@
         </a>
       </div>
       <a href="{% url 'blog:create_image' blog.id %}"><button type="button" class="btn btn-success">add new image</button></a>
-    <p>{{blog.body}}</p>
+    {{blog.body|show_mark}}
+    {{blog.garanty|show_mark}}
     <p>{{blog.garanty}}</p>
     <p>{{blog.price}}</p>
     <p>{{blog.discount}}</p>
@@ -93,7 +93,7 @@
 
   
      {% if user in blog.notifications.all %}
-    <a href="{% url 'blog:un_notifications' blog.id %}"><img src="../../../media/site/unnotyficition.jpg" style="width: 50px; height: 30px;"></a>
+    <a href="{% url 'blog:notifications' blog.id %}"><img src="../../../media/site/unnotyficition.jpg" style="width: 50px; height: 30px;"></a>
     {% else %}
     <a href="{% url 'blog:notifications' blog.id %}"><img src="../../../media/site/notyficition.jpg" style="width: 50px; height: 30px;"></a>
     {% endif %}
@@ -123,7 +123,7 @@
         </div>
 {% like_count blog %}
 {% if user in blog.like.all %}
-<a href="{% url 'blog:unlike' blog.id %}"><img src="../../../media/site/unlike.jpg" style="width: 50px; height: 30px;"></a>
+<a href="{% url 'blog:like' blog.id %}"><img src="../../../media/site/unlike.jpg" style="width: 50px; height: 30px;"></a>
 {% else %}
 <a href="{% url 'blog:like' blog.id %}"><img src="../../../media/site/like.jpg" style="width: 50px; height: 30px;"></a>
 {% endif %}
@@ -161,70 +161,30 @@
       </div>
       {% endfor %}
     <br>
-    {% if blog.number > 0 %}
-    <form method="post" action="{% url 'blog:shop' blog.id %}">
+    <form method="post" action="{% url 'blog:select' %}">
       {% csrf_token %}
+    <input type="hidden" name="id" value="{{blog.id}}">
+
+    {% if blog.color.all %}
     {% for post in blog.color.all %}
     <label>{{post.color}}</label>
-    <input type="radio" id="{{post.color}}" name="color" value="{{post.color}}">
-    
+    <input type="radio" name="color" value="{{post.color}}">
     {% endfor %}
-    <br>
+{% else %}
     {% for size in blog.sizes.all %}
     <label>{{size.size}}</label>
     <input type="radio" name="size" value="{{size.size}}">
     {% endfor %}
-    <label>{{blog.seller.username}}</label>
-    <input type="radio" name="seller" value="{{blog.seller}}">
-    {% for seller in sellers %}
-    <label>{{seller.user.username}}</label>
-    <input type="radio" name="seller" value="{{seller}}">
-    {% endfor %}
-    <br>
-    <button type="button" onclick="f1()">+</button>
-    <button type="button" onclick="f2()">-</button>
-    <input type="number" id="{{blog.id}}" name="num" min="1" max="{{blog.number}}" readonly>
-    <input type="image" src="../../../media/site/shop.jpg"  alt="Submit Form" style="width: 50px; height: 30px;">
-    </form>
-    {% else %}
-    <p>not in shop</p>
     {% endif %}
-    <script>
-      var a = 1 ;
-      document.getElementById("{{blog.id}}").value = a ;
+<input type='submit' value='next'>
+    </form>
 
-      function f1()
-      {
-        a += 1 ;
-
-        if (a > {{blog.number}}){
-          a = {{blog.number}} ;
-        }
-        document.getElementById("{{blog.id}}").value = a ;
-
-      }
-      function f2()
-      {
-        a -= 1 ;
-        if (a == 0){
-          a = 1 ;
-        }
-        document.getElementById("{{blog.id}}").value = a ;
-
-      }
-      function f3()
-      {
-       var color ;
-       color = document.getElementById("color").value 
-       alert(color) 
-      }
-    </script>
  <br>
     <p>create coments</p>
     <br>
     <form enctype="multipart/form-data" method="post">
         {% csrf_token %}
-        {{form1|crispy}}
+        {{form|crispy}}
         <input class="btn btn-primary" type="submit" value="create">
     </form>
     <br>
@@ -232,9 +192,17 @@
     <br>
     {% coment_count blog %}
     {% for text in coments %}
+    <h4>{{text.titel}}</h4>
+    <img src="{{text.image.url}}">
     <p>{{text.body}}</p>
     <p>{{text.user}}</p>
     <p>{{text.date}}</p>
+    <p>{{text.sagestion}}</p>
+    <p>{{text.score}}</p>
+    <p>{{text.bad}}</p>
+    <p>{{text.good}}</p>
+
+
     {% coment_like_count text %}
 
     {% if user in text.likes.all %}
@@ -243,7 +211,6 @@
 <a href="{% url 'coment:blog_likes' text.id %}"><img src="../../../media/site/on_like.jpg" style="width: 50px; height: 30px;"></a>
 {% endif %}
 {% coment_unlike_count text %}
-
 {% if user in text.unlikes.all %}
 <a href="{% url 'coment:blog_unlikes' text.id %}"><img src="../../../media/site/off_unlike.jpg" style="width: 50px; height: 30px;"></a>
 {% else %}
@@ -256,15 +223,8 @@
     {% endif %}
     <p>_____________________________________</p>
     {% endfor %}
-    <p>create custion</p>
-    <br>
-    <form method="post">
-        {% csrf_token %}
-        {{form2|crispy}}
-        <input class="btn btn-primary" type="submit" value="create">
-        
-    </form>
-    <br>
+<a href="{% url 'coment:create_custin' blog.id %}">create_custin</a>
+
     <p>custion</p>
     <br>
     {% custion_count blog %}
@@ -273,7 +233,7 @@
     <p>{{text.user}}</p>
     <p>{{text.date}}</p>
     {% one_respones_count text %}
-    <a href="{% url 'coment:detail' text.id %}"><button>detail</button></a>
+    <a href="{% url 'coment:detail' text.id %}"><button class="btn btn-light">detail</button></a>
     {% custion_like_count text %}
 
     {% if user in text.likes.all %}

@@ -1,6 +1,8 @@
 from django import template
 from appblog.models import MyBlog , Nums
 from django.db.models import Count 
+from django.utils.safestring import mark_safe
+import markdown
 
 register = template.Library()
 
@@ -23,3 +25,7 @@ def view_count(myblog):
 def saveed_count(myblog):
     saveed = MyBlog.objects.filter(id = myblog.id).aggregate(Count('saved'))
     return saveed['saved__count']
+
+@register.filter()
+def show_mark(body):
+    return mark_safe(markdown.markdown(body))

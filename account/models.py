@@ -29,12 +29,16 @@ class MyUserManager(BaseUserManager):
         return user
 
 class User(AbstractBaseUser):
+    choices = (
+        ('m' , 'man'),
+        ('w' , 'wonamn'),
+    )
     username = models.CharField(max_length=200 , unique=True)
     name = models.CharField(max_length=200 )
     familie = models.CharField(max_length=200 )
     email = models.EmailField(max_length=254 )
     number = models.CharField(max_length=11)
-    gender = models.BooleanField()
+    gender = models.CharField(max_length=200 , choices = choices)
     date_of_birth = models.DateField()
     national_code = models.CharField(max_length=10)
     date_special = models.DateField(null=True , blank=True)
@@ -69,9 +73,9 @@ class User(AbstractBaseUser):
 
 class CompanySeller(models.Model):
     choices = (
-        ('d' , 'draft'),
-        ('s' , 'special'),
-        ('n' , 'normal'),
+        ('d' , 'تجاری'),
+        ('s' , 'قیر تجاری'),
+        ('n' , 'شخصی'),
     )
     user = models.OneToOneField(User , related_name='user_seller_company' , on_delete=models.CASCADE)
     company_name = models.CharField(max_length=200)
@@ -86,14 +90,16 @@ class CompanySeller(models.Model):
 
 class SellerAccount(models.Model):
     choices = (
-        ('d' , 'draft'),
-        ('s' , 'special'),
-        ('n' , 'normal'),
+        ('1' , '1-10'),
+        ('2' , '10-100'),
+        ('3' , '100-1000'),
     )
     choice = (
-        ('d' , 'draft'),
-        ('s' , 'special'),
-        ('n' , 'normal'),
+        ('hko' , 'خوراکی'),
+        ('kha' , 'خانگی'),
+        ('b' , 'برقی'),
+        ('e' , 'الکترونیکی'),
+        ('gh' , 'قیره'),
     )
     user = models.OneToOneField(User , related_name='user_seller_account' , on_delete=models.CASCADE)
     shop_name = models.CharField(max_length=200)

@@ -14,7 +14,7 @@
 
         {% for post in brands %}
         <label>{{post.brand}}</label>
-        <input type="checkbox" name="brand" value="{{post.brand}}">
+        <input type="radio" name="brand" value="{{post.brand}}">
         {% endfor %}
         add
         <br>
@@ -52,7 +52,7 @@
         colors
         <br>
         {% for post in mycolor %}
-        <label>{{post.titel}}</label>
+        <label>{{post.color}}</label>
         <input type="checkbox" name="colors" value="{{post.color}}">
         {% endfor %}
         <br>
@@ -63,7 +63,7 @@
         <input type="checkbox" name="sizes" value="{{post.size}}">
         {% endfor %}
         <br>
-          <input type="submit" value="update">
+          <input class="btn btn-warning" type="submit" value="update">
     </form>
 
     {% endblock %}

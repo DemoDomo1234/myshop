@@ -22,6 +22,9 @@ class CreateForm(forms.ModelForm):
         if len(body) < 5 :
             self._errors['body'] = self.error_class([
                 'body minimum 5 characters required'])
+        if "<script>" in body :
+            self._errors['body'] = self.error_class([
+                'you cant script'])
  
         return self.cleaned_data
 

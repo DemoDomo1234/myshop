@@ -14,15 +14,21 @@ def home(request):
     max_tag = Tag.objects.filter(myblog__nums__view__gt = 1000)
     max_view = MyBlog.objects.filter(nums__view__gt = 1000 , published = True)
     form = SearchForm()
+    try :
+        request.session['blogsearch']
+    except :
+        request.session['blogsearch'] = ''
     if 'search' in request.GET :
         form = SearchForm(request.GET)
         if form.is_valid():
             search = form.cleaned_data['search']
-            blog = MyBlog.objects.annotate(blogsearch=TrigramSimilarity('titel', search),).filter(
-            blogsearch__gt=0.3 , published = True).order_by('-blogsearch')
-            page = Paginator(blog, 1)
-            lists = request.GET.get('page' , 1)
-            blog = page.get_page(lists)
+            request.session['blogsearch'] = search
+    if request.session['blogsearch'] :
+        blog = MyBlog.objects.annotate(blogsearch=TrigramSimilarity('titel', request.session.get('search')),).filter(
+        blogsearch__gt=0.3 , published = True).order_by('-blogsearch')
+        page = Paginator(blog, 1)
+        lists = request.GET.get('page' , 1)
+        blog = page.get_page(lists)
     return render(request , 'appblog/index.html' , {'blog':blog ,
      'form':form , 'max_view':max_view , 'max_tag':max_tag})
 
@@ -54,10 +60,10 @@ def detail(request , id):
     else:
         return redirect('account:login')
     coments = ComentsBlog.objects.filter(appblog = blog , published = True)
-    if blog.status == 's' and user.is_special or user.is_superuser :
+    if blog.status == 's' and blog.published == True and user.is_special or user.is_superuser or user == blog.author :
         context = {'blog':blog ,'form':form , 'coments':coments , 'appblogs':appblogs ,
          'tags':tags , 'app_prodacts':app_prodacts , 'category':category}
-    elif blog.status == 'n' :
+    elif blog.status == 'n' and blog.published == True  or user == blog.author :
         context = {'blog':blog ,'form':form , 'coments':coments , 'appblogs':appblogs ,
          'tags':tags , 'app_prodacts':app_prodacts , 'category':category}
     elif blog.status == 'd' and user.is_staff or user.is_admin or user.is_superuser :
@@ -74,25 +80,17 @@ def create(request):
             if request.method == "POST" :
                 form = CreateForm(request.POST , request.FILES)
                 if form.is_valid():
-                        tags = form.cleaned_data['tags']
-                        titel = form.cleaned_data['titel']
-                        body = form.cleaned_data['body']
-                        image = form.cleaned_data['image']
-                        music = form.cleaned_data['music']
-                        film = form.cleaned_data['film']
-                        category = form.cleaned_data['category']
-                        author = user
-                        blog = MyBlog.objects.create(
-                            titel = titel , body = body ,
-                            image = image , music = music , film = film , author = author,)
-                        blog.category.set(category)
-                        for tag in tags :
-                            blog.tags.add(tag)
-                        num = Nums.objects.create(model=blog)
-                        num.save()
-                        blog.save()
-
-                        return redirect('appblog:detail' , blog.id)
+                    cd = form.cleaned_data
+                    blog = MyBlog.objects.create(
+                            titel = cd['titel'] , body = cd['body'] ,
+                            image = cd['image'] , music = cd['music'] , film = cd['film'] , author = user)
+                    blog.category.set(cd['category'])
+                    for tag in cd['tags'] :
+                        blog.tags.add(tag)
+                    num = Nums.objects.create(model=blog)
+                    num.save()
+                    blog.save()
+                    return redirect('appblog:detail' , blog.id)
             else:
                 form = CreateForm()
         else:
@@ -148,19 +146,13 @@ def like(request , id):
         if user not in blog.likes.all() :
             blog.likes.add(user)
             return redirect( 'appblog:detail' , id)
+        else :
+            blog.likes.remove(user)
+            return redirect( 'appblog:detail' , id)
+
     else:
         return redirect('account:login')
     
-def unlike(request , id):
-    blog = get_object_or_404(MyBlog , id = id)
-    user = request.user
-    if user.is_authenticated :
-        if user in blog.likes.all() :
-            blog.likes.remove(user)
-            return redirect( 'appblog:detail' , id)
-    else:
-        return redirect('account:login')
-
 def saved(request , id):
     blog = get_object_or_404(MyBlog , id = id)
     user = request.user
@@ -168,14 +160,7 @@ def saved(request , id):
         if user not in blog.saved.all() :
             blog.saved.add(user)
             return redirect( 'appblog:detail' , id)
-    else:
-        return redirect('account:login')
-
-def unsaved(request , id):
-    blog = get_object_or_404(MyBlog , id = id)
-    user = request.user
-    if user.is_authenticated :
-        if user  in blog.saved.all() :
+        else:
             blog.saved.remove(user)
             return redirect( 'appblog:detail' , id)
     else:

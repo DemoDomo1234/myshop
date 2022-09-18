@@ -9,5 +9,9 @@
       <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
     </div>
   </div>
+  <form method="post" action="{% url 'blog:unlist' post.id %}">
+  <input type="submit" value="delete" class="btn btn-danger">
   {% endfor %}
+  <input type="hidden" value="{{lists.titel}}">
+</form>
     {% endblock %}

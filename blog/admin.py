@@ -4,7 +4,7 @@ from .models import *
 
 class BlogAdmin(admin.ModelAdmin):
     list_display = ("titel", "seller")
-    list_filter = ("time" , "seller" , "price" )
+    list_filter = ("time" , "seller")
     search_fields = ("titel" , "seller" , "body")
 
 admin.site.register(Blog , BlogAdmin)
@@ -31,6 +31,7 @@ admin.site.register(List)
 admin.site.register(OrderItem)
 admin.site.register(Category)
 admin.site.register(Nums)
+admin.site.register(BlogSeller)
 admin.site.register(Brand)
 admin.site.register(ColorNum)
 admin.site.register(Advertising)

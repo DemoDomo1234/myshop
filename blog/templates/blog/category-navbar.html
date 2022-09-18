@@ -1,34 +1,31 @@
-                     <!-- Button trigger modal -->
-
-                     <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
+                                  <ul class="navbar-nav">
+                                    <li class="nav-item dropdown">
+                                      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         category
-                                </button>
-                                <!-- Modal -->
-                                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                  <div class="modal-dialog">
-                                    <div class="modal-content">
-                                      <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">category</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                      </div>
-                                      <div class="modal-body">
-                                        <div class="collapse navbar-collapse nav" id="navbarResponsive">
-                                          <ul class="nav-item dropdown">
-                                            {% for cat in category %}
-                                              {% if cat.more == None %}
-                                                <li class="nav-item">
-                                                  <a class="nav-link" href="{% url 'blog:category_list' cat.id %}">{{cat.titel}}</a>
-                                                  {% if cat.more_categorys.all %}
-                                                    {% include 'blog/category-loop.html' %}
-                                                  {% endif %}
-                                                </li>
-                                              {% endif %}
-                                            {% endfor %}
-                                          </ul>
-                                        </div>
                                         
-                                      </div>
-                                    </div>
-                                  </div>
+                                      </a>
+                                      <ul class="dropdown-menu dropdown-menu-light">
+                                        <li>
+                                          <div class="modal-body">
+                                            <div class="collapse navbar-collapse nav" id="navbarResponsive">
+                                              <ul class="nav-item dropdown">
+                                                {% for cat in category %}
+                                                  {% if cat.more == None %}
+                                                    <li class="nav-item">
+                                                      <a class="nav-link" href="{% url 'blog:category_list' cat.id %}">{{cat.titel}}</a>
+                                                      {% if cat.more_categorys.all %}
+                                                        {% include 'blog/category-loop.html' %}
+                                                      {% endif %}
+                                                    </li>
+                                                  {% endif %}
+                                                {% endfor %}
+                                              </ul>
+                                            </div>
+                                          </div>
+    </li>
+
+                                      </ul>
+                                    </li>
+                                  </ul>
                                 </div>
-                        

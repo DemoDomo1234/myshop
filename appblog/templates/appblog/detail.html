@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% load social_share %}
 {% load myblog_tags %}
+{% load coment_tags %}
 
 {% block content %}
     <h2>{{blog.titel}}</h2>
     <img src="{{blog.image.url}}">
-    <p>{{blog.body}}</p>
+    {{blog.body|show_mark}}
     <p>{{blog.price}}</p>
     <p>{{blog.time}}</p>
     {% view_count blog %}
@@ -72,13 +73,13 @@
     {% endif %}
 {% like_count blog %}
 {% if user in blog.likes.all %}
-<a href="{% url 'appblog:unlike' blog.id %}"><img src="../../../media/site/unlike.jpg" style="width: 50px; height: 30px;"></a>
+<a href="{% url 'appblog:like' blog.id %}"><img src="../../../media/site/unlike.jpg" style="width: 50px; height: 30px;"></a>
 {% else %}
 <a href="{% url 'appblog:like' blog.id %}"><img src="../../../media/site/like.jpg" style="width: 50px; height: 30px;"></a>
 {% endif %}
 {% saveed_count blog %}
 {% if request.user in blog.saved.all %}
-<a href="{% url 'appblog:unsaved' blog.id %}"><img src="../../../media/site/saved.jpg" style="width: 50px; height: 30px;"></a>
+<a href="{% url 'appblog:saved' blog.id %}"><img src="../../../media/site/saved.jpg" style="width: 50px; height: 30px;"></a>
 {% else %}
 <a href="{% url 'appblog:saved' blog.id %}"><img src="../../../media/site/save.jpg" style="width: 50px; height: 30px;"></a>
 {% endif %}

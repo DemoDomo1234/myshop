@@ -4,7 +4,8 @@ from django.db.models import Count , Sum
 from coment.models import Coments , Custion
 from django.db.models import FloatField
 from django.db.models.functions import Cast
-
+from django.utils.safestring import mark_safe
+import markdown
 register = template.Library()
 
 @register.simple_tag()
@@ -17,9 +18,9 @@ def sum_sale(price , discount , num):
     return sale_sum
 
 @register.simple_tag()
-def like_count():
-    likes = Blog.objects.all().aggregate(Count('likes'))
-    return likes['likes__count']
+def like_count(blog):
+    likes = Blog.objects.filter(id = blog.id).aggregate(Count('like'))
+    return likes['like__count']
 
 @register.simple_tag()
 def coment_count(blog):
@@ -52,10 +53,10 @@ def score_count(blog):
     count_score = Coments.objects.filter(blog = blog)
     sum_score = Coments.objects.filter(blog = blog)
     if count_score.exists() and sum_score.exists() :
-        count_score.aggregate(Count('score'))
-        sum_score.annotate(as_float=Cast('score', FloatField())
+        mycount = count_score.aggregate(Count('score'))
+        mysum = sum_score.annotate(as_float=Cast('score', FloatField())
         ).aggregate(Sum('as_float'))
-        return round(sum_score['as_float__sum'] / count_score['score__count'] , 1)
+        return round(mysum['as_float__sum'] / mycount['score__count'] , 1)
     else:
         return 0
 
@@ -67,3 +68,7 @@ def sagestion_count(blog):
         return 0
     else:
         return round(count_sagestion_yes['sagestion__count'] / count_sagestion['sagestion__count'] * 100)
+
+@register.filter()
+def show_mark(body):
+    return mark_safe(markdown.markdown(body))

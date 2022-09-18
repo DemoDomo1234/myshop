@@ -8,15 +8,29 @@
 <p>{{text.date}}</p>
 tow_respones
 <p>{{text.tow_respones}}</p>
-<a href="{% url 'coment:create' text.id %}"><button>repones</button></a>
-<a href="{% url 'coment:custion_unlikes' text.id %}"><button>like</button></a>
-<a href="{% url 'coment:custion_likes' text.id %}"><button>unlike</button></a>
-<br>
-{% tow_respones_count text %}
-{% if text.user == request.user %}
-<a href="{% url 'coment:custion_update' text.id %}">update</a>
-<a href="{% url 'coment:custion_delete' text.id %}">delete</a>
+<a href="{% url 'coment:create' text.id %}"><button class="btn btn-light">repones</button></a>
+{% custion_like_count text %}
+
+{% if user in text.likes.all %}
+<a href="{% url 'coment:custion_likes' text.id %}"><img src="../../../media/site/off_like.jpg" style="width: 50px; height: 30px;"></a>
+{% else %}
+<a href="{% url 'coment:custion_likes' text.id %}"><img src="../../../media/site/on_like.jpg" style="width: 50px; height: 30px;"></a>
 {% endif %}
+{% custion_unlike_count text %}
+
+{% if user in text.unlikes.all %}
+<a href="{% url 'coment:custion_unlikes' text.id %}"><img src="../../../media/site/off_unlike.jpg" style="width: 50px; height: 30px;"></a>
+{% else %}
+<a href="{% url 'coment:custion_unlikes' text.id %}"><img src="../../../media/site/on_unlike.jpg" style="width: 50px; height: 30px;"></a>
+{% endif %}
+<br>
+
+<br>
+{% if text.user == request.user %}
+<a href="{% url 'coment:custion_update' text.id %}"><button class="btn btn-warning">update</button></a>
+<a href="{% url 'coment:custion_delete' text.id %}"><button class="btn btn-danger">delete</button></a>
+{% endif %}
+<p>-------------------------------</p>
 {% endfor %}
         <form  enctype="multipart/form-data" method="POST">
         {% csrf_token %}

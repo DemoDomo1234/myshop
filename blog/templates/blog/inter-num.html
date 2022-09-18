@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<form method="post" action="{% url 'blog:shop' color.blog.id %}">
+    {% csrf_token %}
+
+<button type="button" onclick="f1()">+</button>
+<button type="button" onclick="f2()">-</button>
+<input type="number" id="{{color.id}}" name="num" readonly>
+<input type="hidden" name="color" value="{{color.color}}">
+<input type="hidden" name="size" value="{{color.size}}">
+<input type="hidden" name="seller" value="{{color.seller.id}}">
+
+
+
+<input type="image" src="../../../media/site/shop.jpg"  alt="Submit Form" style="width: 50px; height: 30px;">
+</form>
+<script>
+  var a = 0 ;
+
+  function f1()
+  {
+    a += 1 ;
+
+    if (a > {{color.num}}){
+      a = {{color.num}} ;
+    }
+    document.getElementById("{{color.id}}").value = a ;
+
+  }
+  function f2()
+  {
+    a -= 1 ;
+    if (a == 0){
+      a = 1 ;
+    }
+    document.getElementById("{{color.id}}").value = a ;
+
+  }
+</script>
+{% endblock %}

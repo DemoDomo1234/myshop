@@ -16,4 +16,6 @@ urlpatterns = [
     path('custion-unlikes/<id>' , custion_unlikes , name = 'custion_unlikes'),
     path('detail/<id>' , detail , name='detail'),
     path('create/<id>' , create_custion , name='create'),
+    path('create-custin/<id>' , create_one_custin , name='create_custin'),
+
 ]

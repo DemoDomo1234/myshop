@@ -71,17 +71,12 @@ class Blog(models.Model) :
     titel = models.CharField(max_length=100)
     body = MDTextField()
     image = models.ImageField(upload_to = 'image')
-    price = models.PositiveIntegerField()
     like = models.ManyToManyField(User , related_name='like' , blank = True)
     seller = models.ForeignKey(User , related_name='seller' , on_delete = models.CASCADE)
     time = models.DateTimeField(auto_now_add=True )
-    discount = models.PositiveIntegerField(blank=True)
     lists = models.ManyToManyField(List , related_name='list' , blank= True)
-    number = models.PositiveIntegerField()
     category = models.ManyToManyField(Category , related_name='blog_categorys')
     notifications =  models.ManyToManyField(User , related_name='blog_notifications' , blank = True)
-    address = models.ForeignKey(Address , related_name='blog_address' , on_delete = models.PROTECT)
-    garanty = MDTextField()
     brand = models.ForeignKey(Brand , related_name='blog_brand' , on_delete = models.CASCADE , null=True , blank=True)
     tags = TaggableManager()
     weigth = models.PositiveIntegerField()
@@ -89,6 +84,7 @@ class Blog(models.Model) :
     published = models.BooleanField(default=False)
     sizes = models.ManyToManyField(Sizes , related_name='blog_size_num' , blank= True )
     color = models.ManyToManyField(Colors , related_name='blog_colors_num' , blank= True)
+    garanty = MDTextField()
 
 
     def get_absolute_url(self):
@@ -96,17 +92,6 @@ class Blog(models.Model) :
 
     def __str__(self):
         return self.titel
-
-class OrderItem(models.Model):
-    blog = models.ForeignKey(Blog , related_name='blog' ,  on_delete=models.CASCADE)
-    seller = models.ForeignKey(User , related_name='item_seller' , on_delete = models.CASCADE)
-    num = models.PositiveIntegerField()
-    order = models.ForeignKey(Order , related_name='item' ,  on_delete=models.CASCADE)
-    color = models.ForeignKey(Colors , related_name='colores' , blank= True , null=True , on_delete = models.CASCADE)
-    size = models.ForeignKey(Sizes , related_name='sizees' , blank= True , null=True , on_delete = models.CASCADE)
-
-    def __str__(self):
-        return self.blog.titel
 
 class BlogSeller(models.Model):
     blog = models.ForeignKey(Blog , related_name='seller_blog' ,  on_delete=models.CASCADE)
@@ -116,8 +101,19 @@ class BlogSeller(models.Model):
     discount = models.PositiveIntegerField(blank=True)
     number = models.PositiveIntegerField()
     time = models.DateTimeField(auto_now_add=True )
-    garanty = MDTextField()
     published = models.BooleanField(default=False)
+
+class OrderItem(models.Model):
+    blog = models.ForeignKey(Blog , related_name='blog' ,  on_delete=models.CASCADE)
+    seller = models.ForeignKey(BlogSeller , related_name='item_seller' , on_delete = models.CASCADE)
+    num = models.PositiveIntegerField()
+    order = models.ForeignKey(Order , related_name='item' ,  on_delete=models.CASCADE)
+    color = models.ForeignKey(Colors , related_name='colores' , blank= True , null=True , on_delete = models.CASCADE)
+    size = models.ForeignKey(Sizes , related_name='sizees' , blank= True , null=True , on_delete = models.CASCADE)
+    user = models.ForeignKey(User, related_name=("item_order_user"), on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.blog.titel
 
 class Nums(models.Model):
     num = models.PositiveIntegerField()
@@ -140,8 +136,9 @@ class ColorNum(models.Model):
     blog = models.ForeignKey(Blog , related_name='blog_num' ,  on_delete=models.CASCADE)
     color = models.ForeignKey(Colors , related_name='colors_num' ,  on_delete=models.CASCADE , blank = True , null = True)
     num = models.PositiveIntegerField()
+    price = models.PositiveIntegerField()
     nums = models.PositiveIntegerField(blank = True , null = True , default = 0)
-    seller = models.ForeignKey(User , related_name='num_seller' , on_delete = models.CASCADE)
+    seller = models.ForeignKey(BlogSeller , related_name='num_seller' , on_delete = models.CASCADE)
     published = models.BooleanField(default=False)
 
     def __str__(self):

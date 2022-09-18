@@ -54,7 +54,6 @@ class Coments(models.Model):
     def __str__(self):
         return self.titel
 
-
 class Custion(models.Model):
     one_respones = models.ForeignKey('self', related_name="one_custion", on_delete=models.CASCADE , null=True , blank=True , default=None)
     tow_respones = models.ForeignKey('self', related_name="tow_custion", on_delete=models.CASCADE , null=True , blank=True , default=None)
