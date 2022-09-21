@@ -17,39 +17,32 @@
   </head>
   <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
-          <a class="navbar-brand" href="{% url 'blog:list' %}">Home</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-              <a class="nav-link active" aria-current="page" href="{% url 'appblog:list' %}">Blog</a>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'blog:list' %}">Home</a>
+
+              <a class="btn btn-sm btn-outline-secondary" aria-current="page" href="{% url 'appblog:list' %}">Blog</a>
               {% if request.user.is_authenticated %}
               {% if request.user.is_seller %}
-              <a class="nav-link" href="{% url 'blog:create' %}">create_item</a>
-              <a class="nav-link" href="{% url 'appblog:create' %}">create_blog</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'blog:create' %}">create_item</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'appblog:create' %}">create_blog</a>
               {% else %}
-              <a class="nav-link" href="{% url 'account:create_seller' %}">seller</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'account:create_seller' %}">seller</a>
               {% endif %}
-              <a class="nav-link" href="{% url 'account:logout' %}">logout</a>
-              <a class="nav-link" href="{% url 'account:detail' request.user.id %}">porfile</a>
-              <button type="button" class="btn btn-light position-relative">
-                <a class="nav-link" href="{% url 'blog:order' %}"><img src="../../media/site/shop.jpg" style="width: 40px; height: 25px;"></a>
-                  
-                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-              {% item_count request.user %}
-                    
-                    <span class="visually-hidden">unread messages</span>
-                  </span>
-                </button>
-              <a class="nav-link" href="{% url 'blog:add_address' %}">create_addtess</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'account:logout' %}">logout</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'account:detail' request.user.id %}">porfile</a>
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'blog:order' %}">shop</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'blog:add_address' %}">create_addtess</a>
               {% else %}
-              <a class="nav-link" href="{% url 'account:login' %}">login</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'account:login' %}">login</a>
               {% endif %}
-              <a class="nav-link" href="{% url 'blog:send' %}">call</a>
-              <a class="nav-link" href="{% url 'account:singup' %}">singup</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'blog:send' %}">call</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'account:singup' %}">singup</a>
 
  {% category %}
               
@@ -59,7 +52,6 @@
       </nav>
 
 
-      <p>{{request.user.username}}</p>
 
     {% block content %}
     {% include 'blog/category-list.html' %}

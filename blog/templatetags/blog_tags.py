@@ -72,3 +72,8 @@ def sagestion_count(blog):
 @register.filter()
 def show_mark(body):
     return mark_safe(markdown.markdown(body))
+
+@register.simple_tag()
+def price(price , discount):
+    num = round(discount * price / 100)
+    return price - num

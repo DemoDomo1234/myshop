@@ -87,6 +87,9 @@ class Blog(models.Model) :
     garanty = MDTextField()
 
 
+    class Meta :
+        ordering = ['-time']
+
     def get_absolute_url(self):
         return reverse("blog:detail",args=[self.id] )
 
@@ -102,6 +105,9 @@ class BlogSeller(models.Model):
     number = models.PositiveIntegerField()
     time = models.DateTimeField(auto_now_add=True )
     published = models.BooleanField(default=False)
+
+    class Meta :
+        ordering = ['-price']
 
 class OrderItem(models.Model):
     blog = models.ForeignKey(Blog , related_name='blog' ,  on_delete=models.CASCADE)

@@ -14,6 +14,9 @@ class ComentsBlog(models.Model):
     appblog = models.ForeignKey(MyBlog , related_name= 'coments_myblog', on_delete=models.CASCADE)
     published = models.BooleanField(default=False)
 
+    class Meta :
+        ordering = ['-date']
+
     def get_absolute_url(self):
         return reverse("blog:list")
     
@@ -48,6 +51,9 @@ class Coments(models.Model):
     good = models.TextField()
     published = models.BooleanField(default=False)
     
+    class Meta :
+        ordering = ['-date']
+
     def get_absolute_url(self):
         return reverse("blog:list")
     
@@ -64,6 +70,9 @@ class Custion(models.Model):
     unlikes = models.ManyToManyField(User, related_name= 'unlides_custion', blank= True)
     model = models.ForeignKey(Blog , related_name= 'custion', on_delete=models.CASCADE)
     published = models.BooleanField(default=False)
+
+    class Meta :
+        ordering = ['-date']
 
     def get_absolute_url(self):
         return reverse("blog:list")

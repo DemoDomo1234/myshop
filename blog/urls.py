@@ -43,8 +43,8 @@ urlpatterns = [
     path('go-to-gateway' , go_to_gateway_view , name = 'go_to_gateway'),
     path('callback-gateway' , callback_gateway_view , name = 'callback_gateway'),
     path('item-update/<id>' , item_update , name = 'item_update'),
-    path('select-seller' , select_seller , name = 'select'),
-    path('inter-num' , inter_num , name = 'inter'),
+    path('select-seller/<id>' , select_seller , name = 'select'),
+    path('inter-num/<id>' , inter_num , name = 'inter'),
 
 
 

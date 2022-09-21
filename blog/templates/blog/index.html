@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <nav class="navbar navbar-light bg-light">
+    <nav class="navbar navbar-light">
         <div class="container-fluid">
           <form class="d-flex" method='get'>
             <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name='search'>
@@ -12,11 +12,12 @@
       </nav>
 
 
-
+      <div class="row row-cols-auto">
       {% for post in advertising %}
           <a href="{% url 'blog:brand_list' post.brand.id %}"><img src="{{post.image.url}}"></a>
         {% endfor %}
-
+      </div>
+<div class="row row-cols-auto">
     {% for post in blog %}
     <div class="card" style="width: 18rem;">
         <img src="{{post.image.url}}" class="card-img-top" alt="...">
@@ -27,6 +28,7 @@
         </div>
       </div>
       {% endfor %}
+    </div>
 
       {% if blog %}
 
@@ -56,8 +58,7 @@
   {% else %}
       <p></p>
   {% endif %}
- <p>-----------------------------------------------------------------------------------------</p>
-    <p>discounts</p>
+<div class="row row-cols-auto">
     {% for post in myblog %}
     <div class="card" style="width: 18rem;">
         <img src="{{post.blog.image.url}}" class="card-img-top" alt="...">
@@ -68,9 +69,8 @@
         </div>
       </div>
       {% endfor %}
-
-<p>-----------------------------------------------------------------------------------------</p>
-    <p>max_sale</p>
+    </div>
+<div class="row row-cols-auto">
     {% for post in max_sale %}
     <div class="card" style="width: 18rem;">
         <img src="{{post.image.url}}" class="card-img-top" alt="...">
@@ -81,21 +81,22 @@
         </div>
       </div>
       {% endfor %} 
+    </div>
 
-      <p>-----------------------------------------------------------------------------------------</p>
-    <p>max_brand</p>
+<div class="row row-cols-auto">
     {% for post in max_brand %}
-
           <a href="{% url 'blog:brand_list' post.id %}" class="btn btn-primary">{{post.brand}}</a>
 
       {% endfor %}
+    </div>
 
-      <p>-----------------------------------------------------------------------------------------</p>
 
-      <p>max_category</p>
+<div class="row row-cols-auto">
       {% for post in max_category %}
   
             <a href="{% url 'blog:category_list' post.id %}" class="btn btn-primary">{{post.brand}}</a>
   
         {% endfor %}
+      </div>
+
     {% endblock %}

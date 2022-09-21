@@ -8,7 +8,7 @@
           </form>
         </div>
       </nav>
-
+      <div class="row row-cols-auto">
     {% for post in blog %}
     <div class="card" style="width: 18rem;">
         <img src="{{post.image.url}}" class="card-img-top" alt="...">
@@ -19,6 +19,8 @@
         </div>
       </div>
       {% endfor %}
+  </div>
+
       
       {% if blog %}
 
@@ -49,6 +51,7 @@
     <p></p>
 {% endif %}
 <p>max_view</p>
+<div class="row row-cols-auto">
 {% for post in max_view %}
 <div class="card" style="width: 18rem;">
     <img src="{{post.image.url}}" class="card-img-top" alt="...">
@@ -57,11 +60,13 @@
       <p class="card-text">{{post.price}}</p>
       <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
     </div>
-  </div>
-  <p>max_tags</p>
+  {% endfor %}
+</div>
+
+<div class="row row-cols-auto">
 {% for post in max_tags %}
       <a href="{% url 'appblog:tag_list' post.id %}" class="btn btn-primary">{{post.name}}</a>
   {% endfor %}
-  {% endfor %}
+</div>
 
     {% endblock %}

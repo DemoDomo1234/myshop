@@ -30,8 +30,9 @@
     {{blog.body|show_mark}}
     {{blog.garanty|show_mark}}
     <p>{{blog.garanty}}</p>
-    <p>{{blog.price}}</p>
-    <p>{{blog.discount}}</p>
+    <p>{{seller.price}}</p>
+    <p>{{seller.discount}}</p>
+    {% price seller.price color.seller.discount %}
     <p>{{blog.time}}</p>
     {% score_count blog %}
     <br>
@@ -161,9 +162,8 @@
       </div>
       {% endfor %}
     <br>
-    <form method="post" action="{% url 'blog:select' %}">
+    <form method="post" action="{% url 'blog:select' blog.id %}">
       {% csrf_token %}
-    <input type="hidden" name="id" value="{{blog.id}}">
 
     {% if blog.color.all %}
     {% for post in blog.color.all %}

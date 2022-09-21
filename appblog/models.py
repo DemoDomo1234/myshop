@@ -25,6 +25,9 @@ class MyBlog(models.Model):
     tags = TaggableManager()
     published = models.BooleanField(default=False)
 
+    class Meta :
+        ordering = ['-time']
+
     def get_absolute_url(self):
         return reverse("myblog:list")
 
