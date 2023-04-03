@@ -1,19 +1,20 @@
 from django.contrib import admin
-from .models import Coments , ComentsBlog , Custion
+from .models import Coments, ComentsBlog, Custion
+
 
 class ComentsAdmin(admin.ModelAdmin):
-    list_display = ("titel", "user" , "body")
-    list_filter = ("date" , "titel" , "user" , "body" )
-    search_fields = ("titel" , "user" , "body")
+    list_display = ("titel", "user", "body")
+    list_filter = ("date", "titel", "user", "body")
+    search_fields = ("titel", "user", "body")
 
-admin.site.register(Coments , ComentsAdmin)
+admin.site.register(Coments, ComentsAdmin)
 
 class ComentsBlogAdmin(admin.ModelAdmin):
-    list_display = ("titel", "user" , "body")
-    list_filter = ("date" , "titel" , "user" , "body" )
-    search_fields = ("titel" , "user" , "body")
+    list_display = ("titel", "user", "body")
+    list_filter = ("date", "titel", "user", "body")
+    search_fields = ("titel", "user", "body")
 
-admin.site.register(ComentsBlog , ComentsBlogAdmin)
+admin.site.register(ComentsBlog, ComentsBlogAdmin)
 
 # class CustionAdmin(admin.ModelAdmin):
 #     list_display = ("titel", "user" , "body")

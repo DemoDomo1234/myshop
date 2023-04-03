@@ -28,10 +28,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
-    'account',
-    'blog',
-    'coment',
-    'appblog',
+
+
+    'account.apps.AccountConfig',
+    'blog.apps.BlogConfig',
+    'coment.apps.ComentConfig',
+    'prodact.apps.ProdactConfig',
+    'order.apps.OrderConfig',
+    'seller.apps.SellerConfig',
+    'base.apps.BaseConfig',
+    'address.apps.AddressConfig',
+
+
     'taggit',
     'django_social_share',
     'django.contrib.gis',
@@ -57,7 +65,7 @@ ROOT_URLCONF = 'shop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'shop/blog/templates')],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -148,15 +156,13 @@ EMAIL_HOST_PASSWORD = 'moxczeohuhgyowqm'
 
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if os.name == 'nt':
     VIRTUAL_ENV_BASE = os.environ['VIRTUAL_ENV']
     os.environ['PATH'] = os.path.join(VIRTUAL_ENV_BASE, r'.\Lib\site-packages\osgeo') + ';' + os.environ['PATH']
     os.environ['PROJ_LIB'] = os.path.join(VIRTUAL_ENV_BASE, r'.\Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
+
+
 
 AZ_IRANIAN_BANK_GATEWAYS = {
    'GATEWAYS': {

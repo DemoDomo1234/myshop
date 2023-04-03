@@ -1,79 +1,37 @@
 from django import template
-from blog.models import Blog , OrderItem , Order , Category , ColorNum
-from django.db.models import Count , Sum
-from coment.models import Coments , Custion
-from django.db.models import FloatField
-from django.db.models.functions import Cast
+from blog.models import Blog, Nums
+from django.db.models import Count 
 from django.utils.safestring import mark_safe
 import markdown
+
+
 register = template.Library()
 
-@register.simple_tag()
-def sum_sale(price , discount , num):
-    if num == "":
-        num = "1"
-    dis = discount * price / 100 
-    sale = price - dis 
-    sale_sum = int(sale) * int(num)
-    return sale_sum
 
 @register.simple_tag()
-def like_count(blog):
-    likes = Blog.objects.filter(id = blog.id).aggregate(Count('like'))
-    return likes['like__count']
+def like_count(myblog):
+    likes = Blog.objects.filter(id = myblog.id).aggregate(Count('likes'))
+    return likes['likes__count']
+
 
 @register.simple_tag()
-def coment_count(blog):
-    coments = Blog.objects.filter(id = blog.id).aggregate(Count('coments_blog'))
-    return coments['coments_blog__count']
+def coment_count(myblog):
+    coments = Blog.objects.filter(id = myblog.id).aggregate(Count('coments_myblog'))
+    return coments['coments_myblog__count']
+
 
 @register.simple_tag()
-def custion_count(blog):
-    custion = Blog.objects.filter(id = blog.id).aggregate(Count('custion'))
-    return custion['custion__count']
+def view_count(myblog):
+    views = Nums.objects.filter(id = myblog.id).aggregate(Count('view'))
+    return views['view__count']
+
 
 @register.simple_tag()
-def item_count(user):
-    try:
-        order = Order.objects.get(user = user , current=True)
-    except:
-        order = Order.objects.create(user = user , current=True)
-        order.save()
-    order = Order.objects.get(user = user , current=True)
+def saveed_count(myblog):
+    saveed = Blog.objects.filter(id = myblog.id).aggregate(Count('saved'))
+    return saveed['saved__count']
 
-    item = OrderItem.objects.filter(order = order).aggregate(cart = Count('id'))
-    return item["cart"]
-
-@register.inclusion_tag('blog/category-navbar.html')
-def category():
-    return {'category' : Category.objects.all() ,}
-
-@register.simple_tag()
-def score_count(blog):
-    count_score = Coments.objects.filter(blog = blog)
-    sum_score = Coments.objects.filter(blog = blog)
-    if count_score.exists() and sum_score.exists() :
-        mycount = count_score.aggregate(Count('score'))
-        mysum = sum_score.annotate(as_float=Cast('score', FloatField())
-        ).aggregate(Sum('as_float'))
-        return round(mysum['as_float__sum'] / mycount['score__count'] , 1)
-    else:
-        return 0
-
-@register.simple_tag()
-def sagestion_count(blog):
-    count_sagestion = Coments.objects.filter(blog = blog).aggregate(Count('sagestion'))
-    count_sagestion_yes = Coments.objects.filter(blog = blog , sagestion = 'yes').aggregate(Count('sagestion'))
-    if count_sagestion_yes['sagestion__count'] == 0 and count_sagestion['sagestion__count'] == 0 :
-        return 0
-    else:
-        return round(count_sagestion_yes['sagestion__count'] / count_sagestion['sagestion__count'] * 100)
 
 @register.filter()
 def show_mark(body):
     return mark_safe(markdown.markdown(body))
-
-@register.simple_tag()
-def price(price , discount):
-    num = round(discount * price / 100)
-    return price - num

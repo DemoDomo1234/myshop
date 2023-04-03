@@ -1,30 +1,31 @@
 from django import forms
 
+
 class ComentsForm(forms.Form):
     choices = (
-        ('y' , 'yes'),
-        ('i' , 'I do not know'),
-        ('n' , 'no'),
+        ('y', 'yes'),
+        ('i', 'I do not know'),
+        ('n', 'no'),
     )
     choice = (
-        ('0' , '0'),
-        ('1' , '1'),
-        ('2' , '2'),
-        ('3' , '3'),
-        ('4' , '4'),
-        ('5' , '5'),
+        ('0', '0'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+        ('5', '5'),
     )
-    sagestion = forms.CharField(max_length=50 , widget = forms.Select(choices=choices))
-    score = forms.CharField(max_length=50 , widget = forms.Select(choices=choice))
+    sagestion = forms.CharField(max_length=50, widget=forms.Select(choices=choices))
+    score = forms.CharField(max_length=50, widget=forms.Select(choices=choice))
     titel = forms.CharField(max_length=100 )
-    body = forms.CharField(widget = forms.Textarea)
+    body = forms.CharField(widget=forms.Textarea)
     image = forms.ImageField()
-    bad = forms.CharField(widget = forms.Textarea)
-    good = forms.CharField(widget = forms.Textarea)
+    bad = forms.CharField(widget=forms.Textarea)
+    good = forms.CharField(widget=forms.Textarea)
 
     def clean(self):
  
-        super(ComentsForm, self).clean()
+        super().clean()
          
         titel = self.cleaned_data.get('titel')
         body = self.cleaned_data.get('body')
@@ -52,29 +53,29 @@ class ComentsForm(forms.Form):
 
 class UpdateComentsForm(forms.Form):
     choices = (
-        ('y' , 'yes'),
-        ('i' , 'I do not know'),
-        ('n' , 'no'),
+        ('y', 'yes'),
+        ('i', 'I do not know'),
+        ('n', 'no'),
     )
     choice = (
-        ('0' , '0'),
-        ('1' , '1'),
-        ('2' , '2'),
-        ('3' , '3'),
-        ('4' , '4'),
-        ('5' , '5'),
+        ('0', '0'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+        ('5', '5'),
     )
-    sagestion = forms.CharField(max_length=50 , widget = forms.Select(choices=choices))
-    score = forms.CharField(max_length=50 , widget = forms.Select(choices=choice))
+    sagestion = forms.CharField(max_length=50, widget=forms.Select(choices=choices))
+    score = forms.CharField(max_length=50, widget=forms.Select(choices=choice))
     titel = forms.CharField(max_length=100)
-    body = forms.CharField(widget = forms.Textarea)
+    body = forms.CharField(widget=forms.Textarea)
     image = forms.ImageField()
-    bad = forms.CharField(widget = forms.Textarea)
-    good = forms.CharField(widget = forms.Textarea)
+    bad = forms.CharField(widget=forms.Textarea)
+    good = forms.CharField(widget=forms.Textarea)
 
     def clean(self):
  
-        super(UpdateComentsForm, self).clean()
+        super().clean()
          
         titel = self.cleaned_data.get('titel')
         body = self.cleaned_data.get('body')
@@ -102,11 +103,11 @@ class UpdateComentsForm(forms.Form):
 
 class ComentsBlogForm(forms.Form):
     titel = forms.CharField(max_length=100 )
-    body = forms.CharField(widget = forms.Textarea)
+    body = forms.CharField(widget=forms.Textarea)
 
     def clean(self):
  
-        super(ComentsBlogForm, self).clean()
+        super().clean()
          
         titel = self.cleaned_data.get('titel')
         body = self.cleaned_data.get('body')
@@ -123,11 +124,11 @@ class ComentsBlogForm(forms.Form):
 
 class UpdateComentsBlogForm(forms.Form):
     titel = forms.CharField(max_length=100)
-    body = forms.CharField(widget = forms.Textarea)
+    body = forms.CharField(widget=forms.Textarea)
 
     def clean(self):
  
-        super(UpdateComentsBlogForm, self).clean()
+        super().clean()
          
         titel = self.cleaned_data.get('titel')
         body = self.cleaned_data.get('body')
@@ -143,11 +144,11 @@ class UpdateComentsBlogForm(forms.Form):
         return self.cleaned_data
 
 class CustionForm(forms.Form):
-    custion_body = forms.CharField(widget = forms.Textarea )
+    custion_body = forms.CharField(widget=forms.Textarea)
 
     def clean(self):
  
-        super(CustionForm, self).clean()
+        super().clean()
          
         custion_body = self.cleaned_data.get('custion_body')
 
@@ -158,11 +159,11 @@ class CustionForm(forms.Form):
         return self.cleaned_data
 
 class UpdateCustionForm(forms.Form):
-    body = forms.CharField(widget = forms.Textarea)
+    body = forms.CharField(widget=forms.Textarea)
 
     def clean(self):
  
-        super(UpdateCustionForm, self).clean()
+        super().clean()
          
         body = self.cleaned_data.get('body')
 

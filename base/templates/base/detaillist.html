@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+{% for post in blog %}
+<div class="card" style="width: 18rem;">
+    <img src="{{post.image.url}}" class="card-img-top" alt="...">
+    <div class="card-body">
+      <h5 class="card-title">{{post.titel}}</h5>
+      <p class="card-text">{{post.price}}</p>
+      <a href="{% url 'prodact:detail' post.id %}" class="btn btn-primary">detail</a>
+    </div>
+  </div>
+  <form method="post" action="{% url 'base:unlist' post.id %}">
+  <input type="submit" value="delete" class="btn btn-danger">
+  {% endfor %}
+  <input type="hidden" value="{{lists.titel}}">
+</form>
+    {% endblock %}

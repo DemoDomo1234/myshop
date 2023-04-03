@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
-
 {% block content %}
-    <nav class="navbar navbar-light">
+    <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
           <form class="d-flex" method='get'>
             <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name='search'>
@@ -10,93 +8,65 @@
           </form>
         </div>
       </nav>
-
-
       <div class="row row-cols-auto">
-      {% for post in advertising %}
-          <a href="{% url 'blog:brand_list' post.brand.id %}"><img src="{{post.image.url}}"></a>
-        {% endfor %}
-      </div>
-<div class="row row-cols-auto">
     {% for post in blog %}
     <div class="card" style="width: 18rem;">
         <img src="{{post.image.url}}" class="card-img-top" alt="...">
         <div class="card-body">
           <h5 class="card-title">{{post.titel}}</h5>
           <p class="card-text">{{post.price}}</p>
-          <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
+          <a href="{% url 'appblog:detail' post.id %}" class="btn btn-primary">detail</a>
         </div>
       </div>
       {% endfor %}
-    </div>
+  </div>
 
+      
       {% if blog %}
 
-      {% if blog.has_other_pages %}
-      <div class="btn-group" role="group" aria-label="Item pagination">
-          {% if blog.has_previous %}
-              <a href="?page={{ blog.previous_page_number }}" class="btn btn-outline-primary">&laquo;</a>
-          {% endif %}
-  
-          {% for page_number in blog.paginator.page_range %}
-              {% if blog.number == page_number %}
-                  <button class="btn btn-outline-primary active">
-                      <span>{{ page_number }} <span class="sr-only"></span></span>
-                  </button>
-              {% else %}
-                  <a href="?page={{ page_number }}" class="btn btn-outline-primary">
-                      {{ page_number }}
-                  </a>
-              {% endif %}
-          {% endfor %}
-  
-          {% if blog.has_next %}
-              <a href="?page={{ blog.next_page_number }}" class="btn btn-outline-primary">&raquo;</a>
-          {% endif %}
-      </div>
-      {% endif %}
-  {% else %}
-      <p></p>
-  {% endif %}
-<div class="row row-cols-auto">
-    {% for post in myblog %}
-    <div class="card" style="width: 18rem;">
-        <img src="{{post.blog.image.url}}" class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">{{post.blog.titel}}</h5>
-          <p class="card-text">{{post.blog.price}}</p>
-          <a href="{% url 'blog:detail' post.blog.id %}" class="btn btn-primary">detail</a>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-<div class="row row-cols-auto">
-    {% for post in max_sale %}
-    <div class="card" style="width: 18rem;">
-        <img src="{{post.image.url}}" class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">{{post.titel}}</h5>
-          <p class="card-text">{{post.price}}</p>
-          <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
-        </div>
-      </div>
-      {% endfor %} 
-    </div>
+    {% if blog.has_other_pages %}
+    <div class="btn-group" role="group" aria-label="Item pagination">
+        {% if blog.has_previous %}
+            <a href="?page={{ blog.previous_page_number }}" class="btn btn-outline-primary">&laquo;</a>
+        {% endif %}
 
-<div class="row row-cols-auto">
-    {% for post in max_brand %}
-          <a href="{% url 'blog:brand_list' post.id %}" class="btn btn-primary">{{post.brand}}</a>
-
-      {% endfor %}
-    </div>
-
-
-<div class="row row-cols-auto">
-      {% for post in max_category %}
-  
-            <a href="{% url 'blog:category_list' post.id %}" class="btn btn-primary">{{post.brand}}</a>
-  
+        {% for page_number in blog.paginator.page_range %}
+            {% if blog.number == page_number %}
+                <button class="btn btn-outline-primary active">
+                    <span>{{ page_number }} <span class="sr-only"></span></span>
+                </button>
+            {% else %}
+                <a href="?page={{ page_number }}" class="btn btn-outline-primary">
+                    {{ page_number }}
+                </a>
+            {% endif %}
         {% endfor %}
-      </div>
+
+        {% if blog.has_next %}
+            <a href="?page={{ blog.next_page_number }}" class="btn btn-outline-primary">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+{% else %}
+    <p></p>
+{% endif %}
+<p>max_view</p>
+<div class="row row-cols-auto">
+{% for post in max_view %}
+<div class="card" style="width: 18rem;">
+    <img src="{{post.image.url}}" class="card-img-top" alt="...">
+    <div class="card-body">
+      <h5 class="card-title">{{post.titel}}</h5>
+      <p class="card-text">{{post.price}}</p>
+      <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="row row-cols-auto">
+{% for post in max_tags %}
+      <a href="{% url 'appblog:tag_list' post.id %}" class="btn btn-primary">{{post.name}}</a>
+  {% endfor %}
+</div>
 
     {% endblock %}

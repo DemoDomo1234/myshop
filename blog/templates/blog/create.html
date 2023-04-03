@@ -1,50 +1,10 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags %} 
 {% block content %}
-<nav class="navbar navbar-light bg-light">
-  <div class="container-fluid">
-    <form class="d-flex" method='get'>
-      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name='search'>
-      <button class="btn btn-outline-primary" type="submit">Search</button>
+    <form  enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      {{ form.media }}
+      {{form|crispy}} 
+          <input type="submit" value="create" class="btn btn-success">
     </form>
-  </div>
-</nav>
-
-
-        <form  enctype="multipart/form-data" method="POST">
-        {% csrf_token %}
-        {{ form.media }}
-        {{form|crispy}}
-          category
-          <br>
-          {% for post in category %}
-          <label>{{post.titel}}</label>
-          <input type="checkbox" name="category" value="{{post.titel}}">
-          {% endfor %}
-          <br>
-          brand
-          <br>
-          {% for posts in brands %}
-          <label>{{posts.brand}}</label>
-          <input type="radio" name="brand" value="{{posts.brand}}">
-          {% endfor %}
-          <br>
-          <br>
-          colors
-          <br>
-          {% for post in colors %}
-          <label>{{post.color}}</label>
-          <input type="checkbox" name="color" value="{{post.color}}">
-          {% endfor %}
-          <br>
-          sizes
-          <br>
-          {% for post in sizes %}
-          <label>{{post.size}}</label>
-          <input type="checkbox" name="size" value="{{post.size}}">
-          {% endfor %}
-          <br>
-          <input class="btn btn-primary" type="submit" value="create">
-    </form>
-    <a href="{% url 'blog:create_category' %}">create category</a>
     {% endblock %}

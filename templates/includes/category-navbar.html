@@ -1,0 +1,26 @@
+
+                                      <a class="btn btn-sm btn-outline-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        category
+                                        
+                                      </a>
+                                      <ul class="dropdown-menu dropdown-menu-light">
+                                        <li>
+                                          <div class="modal-body">
+                                            <div class="collapse navbar-collapse nav" id="navbarResponsive">
+                                              <ul class="nav-item dropdown">
+                                                {% for cat in category %}
+                                                  {% if cat.more == None %}
+                                                    <li class="nav-item">
+                                                      <a class="nav-link" href="{% url 'base:category_list' cat.id %}">{{cat.titel}}</a>
+                                                      {% if cat.more_categorys.all %}
+                                                        {% include 'includes/category-loop.html' %}
+                                                      {% endif %}
+                                                    </li>
+                                                  {% endif %}
+                                                {% endfor %}
+                                              </ul>
+                                            </div>
+                                          </div>
+    </li>
+
+                                      </ul>

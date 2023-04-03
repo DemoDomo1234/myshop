@@ -29,7 +29,7 @@
         <div class="card-body">
           <h5 class="card-title">{{post.titel}}</h5>
           <p class="card-text">{{post.price}}</p>
-          <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
+          <a href="{% url 'prodact:detail' post.id %}" class="btn btn-primary">detail</a>
         </div>
       </div>
       {% endfor %}
@@ -40,7 +40,7 @@
           <div class="card-body">
             <h5 class="card-title">{{post.titel}}</h5>
             <p class="card-text">{{post.price}}</p>
-            <a href="{% url 'blog:detail' post.id %}" class="btn btn-primary">detail</a>
+            <a href="{% url 'prodact:detail' post.id %}" class="btn btn-primary">detail</a>
           </div>
         </div>
         {% endfor %}
@@ -59,7 +59,7 @@
               <div class="card-body">
                 <h5 class="card-title">{{post.titel}}</h5>
                 <p class="card-text">{{post.body}}</p>
-                <a href="{% url 'blog:detail_list' post.id %}">detail</a>
+                <a href="{% url 'prodact:detail_list' post.id %}">detail</a>
               </div>
             </div>
             {% endfor %}
